@@ -1,0 +1,66 @@
+name: Scan skill from chat
+
+on:
+  push:
+    branches: [main]
+    paths: ['.scan-requests/*.json']
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    outputs:
+      request_id: ${{ steps.request.outputs.request_id }}
+    steps:
+      - name: Read trusted scanner workflow and request
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Identify the new request
+        id: request
+        run: python3 scripts/chat_scan.py select
+      - name: Install pinned SkillSpector
+        run: |
+          python3 -m venv "$RUNNER_TEMP/scanner"
+          "$RUNNER_TEMP/scanner/bin/pip" install "git+https://github.com/NVIDIA/skillspector.git@a09091e0ebf6c96ff327457529d7b0d372125884"
+          echo "$RUNNER_TEMP/scanner/bin" >> "$GITHUB_PATH"
+      - name: Scan selected skill and record outcome
+        if: always() && steps.request.outcome == 'success'
+        env:
+          REQUEST_PATH: ${{ steps.request.outputs.request_path }}
+        run: python3 scripts/chat_scan.py scan "$REQUEST_PATH"
+      - name: Preserve request result
+        if: always() && steps.request.outcome == 'success'
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: chat-scan-${{ github.run_id }}
+          path: chat-results/
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: scan
+    if: always() && needs.scan.outputs.request_id != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Read trusted publisher
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - name: Retrieve this run's result
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: chat-scan-${{ github.run_id }}
+          path: chat-results
+      - name: Publish JSON evidence for chat retrieval
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUEST_ID: ${{ needs.scan.outputs.request_id }}
+        run: python3 scripts/chat_scan.py publish "chat-results/$REQUEST_ID"
