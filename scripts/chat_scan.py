@@ -90,7 +90,7 @@ def github_api(endpoint, token=None, method="GET", data=None):
 
 def source_tree(request, api=github_api):
     repo = request["repository"]
-    # No credentials are passed to candidate repository reads.
+    # The caller provides only public-source access; validate public visibility before acquisition.
     commit = api(f"/repos/{repo}/commits/{urllib.parse.quote(request['ref'], safe='')}")
     sha = commit["sha"]
     if not re.fullmatch(r"[0-9a-f]{40}", sha):
@@ -185,7 +185,15 @@ def run_request(request_path, output_root=Path("chat-results"), api=github_api, 
             raise ValueError("Request exceeds size limit")
         request = validate_request(json.loads(raw))
         result.update({k: request[k] for k in ("repository_url", "ref")})
-        sha, entries, skills = source_tree(request, api)
+        source_api = api
+        read_token = os.getenv("SOURCE_READ_TOKEN")
+        if api is github_api and read_token:
+            def source_api(endpoint):
+                return github_api(endpoint, token=read_token)
+        visibility = source_api(f"/repos/{request['repository']}")
+        if visibility.get("private") is not False:
+            raise ValueError("Only public candidate repositories are supported")
+        sha, entries, skills = source_tree(request, source_api)
         result["source_commit"] = sha
         selected = select_skill(request["skill_path"], skills)
         if selected is None:
@@ -194,11 +202,13 @@ def run_request(request_path, output_root=Path("chat-results"), api=github_api, 
             result["skill_path"] = selected
             with tempfile.TemporaryDirectory(prefix="skill-review-") as temp:
                 folder = Path(temp) / "candidate"
-                result["files"] = materialize(request["repository"], entries, selected, folder, api)
+                result["files"] = materialize(request["repository"], entries, selected, folder, source_api)
                 report_path = (out / "report.json").resolve()
+                scanner_env = {k: v for k, v in os.environ.items() if k not in
+                               {"SOURCE_READ_TOKEN", "GH_TOKEN", "GITHUB_TOKEN"}}
                 proc = subprocess.run([scanner, "scan", str(folder), "--no-llm", "--fail-on-findings",
                                        "--fail-on-incomplete", "--format", "json", "--output", str(report_path)],
-                                      capture_output=True, timeout=600)
+                                      capture_output=True, timeout=600, env=scanner_env)
                 result["scanner_exit_code"] = proc.returncode
                 if not report_path.is_file() or report_path.stat().st_size > 2 * MAX_RESPONSE:
                     raise ValueError("Scanner did not produce a bounded report")
