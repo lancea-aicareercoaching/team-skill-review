@@ -13,6 +13,14 @@ Shared security reports, review status, and instructions for selected GitHub ski
 - Claude functionality: not yet tested. Chief of Staff remains under review.
 - Access from another team member's account: not independently verified.
 
+## Scan a skill from chat
+
+The chat-to-cloud connection has been verified in ChatGPT: a request created in conversation triggered GitHub Actions, and its matching Teach Me report was retrieved in that conversation. The first live scan reported 0 findings with complete configured static inspection.
+
+Ask the assistant: **Scan this GitHub skill: [link].** The assistant needs a GitHub connection with file creation and read access to this repository. Follow [the chat scan protocol](docs/CHAT-SCAN-PROTOCOL.md) for request submission, result retrieval, and interpretation. A reusable installed chat skill is still pending; this documentation does not install one. Claude connectivity is not yet tested.
+
+The new workflow accepts public repository URLs and an optional skill folder and version. Multiple discovered skills require a selection. It is a skill scan, not a whole-repository audit. JSON results are retained in `.scan-results/<request-id>/` and can be retrieved directly through the GitHub connection.
+
 ## Teach Me download and installation
 
 See [Teach Me: download, install, and test](docs/TEACH-ME-GUIDE.md) for the recorded source version, source download, MIT license, ChatGPT route, proposed Claude route, and exact test limits.
@@ -36,7 +44,7 @@ To test updated workflow code, start a new run from **main**. Re-running an olde
 
 ### Scope and usage
 
-**Scan selected skills** scans Chief of Staff and Agent Protocol at their fixed source commit below. **Scan Teach Me** scans Teach Me at commit `10fcc17a274432a871b39fd4b4ec516ea9bf10bb`; download its artifact named `static-review-teach-me`. Neither workflow accepts arbitrary GitHub links, activates skills, or automatically approves downloads.
+**Scan selected skills** scans Chief of Staff and Agent Protocol at their fixed source commit below. **Scan Teach Me** scans Teach Me at commit `10fcc17a274432a871b39fd4b4ec516ea9bf10bb`; download its artifact named `static-review-teach-me`. These two older workflows remain fixed examples. The new **Scan skill from chat** workflow accepts new public repository targets. No workflow activates skills or automatically approves downloads.
 
 Runs use the repository owner's GitHub Actions allowance. Each of the two jobs has a 20-minute timeout. Check included compute and artifact-storage usage before repeated runs; do not enable paid usage without the agreed business approval.
 
@@ -88,13 +96,13 @@ Local and first-run cloud reports were reviewed. Run #2 verified the updated upl
 6. For cleared candidates, prepare versioned downloads with attribution, license notices, and installation instructions.
 7. Test functionality in the intended environment and record what was actually verified.
 
-The existing workflow must be deliberately updated and tested to scan a different candidate. It is not a general skill-link submission service yet.
+Use the new chat scan protocol to submit a different public skill without editing workflow code. The original manual workflows remain available for their fixed candidates.
 
 ## Use reviewed skills
 
 Downloading files does not install a skill. Follow each cleared candidate's environment-specific instructions. Compatibility with ChatGPT, Claude chat, and Claude Code must be tested separately.
 
-This repository does not currently connect ChatGPT or Claude directly to the scanner. An assistant can explain an uploaded report; triggering scans from chat requires a separate integration.
+The request-file connection now lets an authorized assistant submit a scan and retrieve its results. It has been verified in ChatGPT. Each assistant/account still needs suitable GitHub tools and access; a skill alone does not grant those permissions. Claude remains unverified.
 
 ## Repository contents
 
@@ -105,6 +113,10 @@ This repository does not currently connect ChatGPT or Claude directly to the sca
 - `downloads/`: versioned Teach Me source ZIP and checksums.
 - `packages/teach-me/`: unchanged upstream skill and MIT license.
 - `tests/`: observed learning progress and checklist-storage test.
+- `.github/workflows/chat-scan.yml`: request-triggered cloud skill scanner and result publisher.
+- `scripts/chat_scan.py`: bounded source acquisition, scan handling, and JSON publication.
+- `docs/CHAT-SCAN-PROTOCOL.md`: assistant procedure and connection requirements.
+- `.scan-requests/` and `.scan-results/`: correlated requests and retained evidence.
 - `.github/workflows/scan-skills.yml`: manually triggered cloud scanner.
 - `.github/workflows/scan-teach-me.yml`: manually triggered Teach Me scanner.
 
