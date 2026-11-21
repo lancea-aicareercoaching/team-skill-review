@@ -111,6 +111,47 @@ class ChatScanTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 worker.publish(folder, lambda *a, **k: self.fail('must not publish'))
 
+    def test_pipeline_keeps_read_token_out_of_scanner(self):
+        data = b'# Skill\n'
+        sha = hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+        def api(endpoint):
+            if '/commits/' in endpoint:
+                return {'sha': 'a'*40, 'commit': {'tree': {'sha': 'b'*40}}}
+            if '/git/trees/' in endpoint:
+                return {'tree': [{'path': 'SKILL.md', 'type': 'blob', 'mode': '100644', 'size': len(data), 'sha': sha}]}
+            if '/git/blobs/' in endpoint:
+                return {'encoding': 'base64', 'content': base64.b64encode(data).decode()}
+            return {'private': False}
+        def scanner(args, **kwargs):
+            self.assertNotIn('SOURCE_READ_TOKEN', kwargs['env'])
+            self.assertNotIn('GH_TOKEN', kwargs['env'])
+            Path(args[-1]).write_text(json.dumps(CLEAN))
+            return subprocess.CompletedProcess(args, 0)
+        with tempfile.TemporaryDirectory() as tmp, patch.dict(os.environ, SOURCE_READ_TOKEN='read-placeholder', GH_TOKEN='write-placeholder'), patch.object(worker.subprocess, 'run', side_effect=scanner):
+            old = os.getcwd()
+            try:
+                os.chdir(tmp)
+                Path('.scan-requests').mkdir()
+                Path('.scan-requests/test-12345.json').write_text(json.dumps(GOOD))
+                result = worker.run_request('.scan-requests/test-12345.json', api=api)
+                self.assertEqual(result['state'], 'no_findings')
+                self.assertEqual(result['source_commit'], 'a'*40)
+            finally:
+                os.chdir(old)
+
+    def test_private_candidate_is_rejected_before_download(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            old = os.getcwd()
+            try:
+                os.chdir(tmp)
+                Path('.scan-requests').mkdir()
+                Path('.scan-requests/test-12345.json').write_text(json.dumps(GOOD))
+                result = worker.run_request('.scan-requests/test-12345.json', api=lambda _: {'private': True})
+                self.assertEqual(result['state'], 'scan_error')
+                self.assertIn('public candidate', result['error'])
+            finally:
+                os.chdir(old)
+
     def test_publish_report_before_completion_marker(self):
         with tempfile.TemporaryDirectory() as tmp, patch.dict(os.environ, GITHUB_REPOSITORY='a/b', GH_TOKEN='test-placeholder'):
             folder = Path(tmp)/'test-12345'
