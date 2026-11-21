@@ -1,0 +1,72 @@
+name: Scan Teach Me
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SOURCE_COMMIT: 10fcc17a274432a871b39fd4b4ec516ea9bf10bb
+      SCANNER_COMMIT: a09091e0ebf6c96ff327457529d7b0d372125884
+      SKILL_PATH: claude-plugins/manifest-dev-tools/skills/teach-me
+
+    steps:
+      - name: Install pinned scanner
+        shell: bash
+        run: |
+          python3 -m venv "$RUNNER_TEMP/scanner"
+          "$RUNNER_TEMP/scanner/bin/pip" install \
+            "git+https://github.com/NVIDIA/skillspector.git@$SCANNER_COMMIT"
+          echo "$RUNNER_TEMP/scanner/bin" >> "$GITHUB_PATH"
+
+      - name: Download selected source version
+        shell: bash
+        run: |
+          git init candidate
+          git -C candidate remote add origin https://github.com/doodledood/manifest-dev.git
+          git -C candidate fetch --depth=1 --filter=blob:none origin "$SOURCE_COMMIT"
+          git -C candidate sparse-checkout init --cone
+          git -C candidate sparse-checkout set "$SKILL_PATH"
+          git -C candidate checkout --detach FETCH_HEAD
+          test "$(git -C candidate rev-parse HEAD)" = "$SOURCE_COMMIT"
+          test -f "candidate/$SKILL_PATH/SKILL.md"
+          test -f candidate/LICENSE
+
+      - name: Record source and scan scope
+        shell: bash
+        run: |
+          mkdir -p results
+          printf '%s\n' \
+            "Source: https://github.com/doodledood/manifest-dev" \
+            "Source commit: $SOURCE_COMMIT" \
+            "Skill path: $SKILL_PATH" \
+            "Scanner commit: $SCANNER_COMMIT" \
+            "Mode: static only; AI analysis disabled" \
+            "Status: UNDER REVIEW; not approved for installation" \
+            "No candidate scripts or instructions were activated" \
+            > results/provenance.txt
+          cp candidate/LICENSE results/source-LICENSE.txt
+
+      - name: Scan without activating Teach Me
+        shell: bash
+        run: |
+          skillspector scan "candidate/$SKILL_PATH" \
+            --no-llm \
+            --fail-on-findings \
+            --fail-on-incomplete \
+            --format json \
+            --output results/report.json
+
+      - name: Preserve review evidence
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: static-review-teach-me
+          path: results/
+          if-no-files-found: warn
+          retention-days: 7
