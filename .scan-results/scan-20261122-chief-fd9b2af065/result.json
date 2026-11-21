@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "request_id": "scan-20261122-chief-fd9b2af065",
+  "state": "scan_error",
+  "scan_mode": "static_only",
+  "approval": "not_granted",
+  "scanner_commit": "a09091e0ebf6c96ff327457529d7b0d372125884",
+  "run_url": "https://github.com/lancea-aicareercoaching/team-skill-review/actions/runs/44931681118",
+  "limitations": [
+    "Not a whole-repository security audit.",
+    "Candidate code and instructions are not activated.",
+    "External dependencies and AI semantic analysis are not requested.",
+    "No installation or rollout approval is granted."
+  ],
+  "repository_url": "https://github.com/alirezarezvani/claude-skills",
+  "ref": "f8593c4941210a621a6629ce1da9e07897976d5f",
+  "source_commit": "f8593c4941210a621a6629ce1da9e07897976d5f",
+  "skill_path": "c-level-advisor/skills/chief-of-staff",
+  "error": "GitHub API HTTP 403; check repository visibility, ref, permissions, or rate limit"
+}
