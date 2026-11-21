@@ -51,4 +51,15 @@ A separate publisher runner writes only that request's report and summary to `.s
 
 ## Verification status
 
-This feature requires a live test that creates a request through chat, triggers GitHub Actions, and retrieves that request's completed JSON report. Local unit tests alone do not establish that the connection works. Record live test evidence here after that test succeeds. Claude connectivity remains unverified until tested separately. Installation and functionality testing of scanned skills are Part 2.
+Verified from this ChatGPT conversation on November 22, 2026 (Asia/Manila): requests were created through the GitHub connection, GitHub Actions processed them, and matching JSON results were retrieved. Full reports were also retrieved for the completed Teach Me and Chief of Staff scans.
+
+| Test | Observed result | Evidence |
+|---|---|---|
+| Teach Me | `no_findings`, 0/100 LOW, 0 findings, complete configured static coverage | [Run 44931530616](https://github.com/lancea-aicareercoaching/team-skill-review/actions/runs/44931530616), [result](../.scan-results/scan-20261122-teachme-290b71fc32/result.json) |
+| Repository with multiple skills | `needs_selection`, 84 discovered folders; first 30 listed; no skill scanned | [Result](../.scan-results/scan-20261122-discover-c79506f3b5/result.json) |
+| Source API access failure | `scan_error` was published and retrieved, without implying a completed scan | [Result](../.scan-results/scan-20261122-chief-fd9b2af065/result.json) |
+| Chief of Staff after read-only API fix | `needs_review`, 6/100 LOW, one MEDIUM RA2 persistence finding at SKILL.md:157; complete configured static coverage | [Run 44931956216](https://github.com/lancea-aicareercoaching/team-skill-review/actions/runs/44931956216), [result](../.scan-results/scan-20261122-chief-retry-8ae94394/result.json) |
+
+Both completed scan runs had successful scanning and publishing jobs. The Chief of Staff scan retained scanner exit code 1 and explicitly returned `needs_review` even though the automation succeeded. Sixteen offline unit tests passed, covering request validation, verified downloads, private-repository rejection, credential removal from the scanner environment, result classification, and request/result correlation.
+
+A reusable installed chat skill is still pending: personal skill storage could not be accessed from this execution session, including the supported alternative connection. The instructions above are saved and usable in this conversation; they are not an installed skill. Claude connectivity and another account's access remain unverified. Installation and functionality testing of scanned skills are Part 2.
