@@ -1,0 +1,3 @@
+8ab609c5ce32feed797006ea6f5483ff358747b110a3208bc6fcbca3ac606f63  downloads/teach-me-10fcc17a.zip
+f31aba85c1f33a6048d5b7e60350dbaa7906b16514a742d19ca101e0a77514d9  packages/teach-me/SKILL.md
+677da22b43534002e1b6fb727b544274b89410645d7f8b55bce539245abd4bc3  packages/teach-me/LICENSE

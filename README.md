@@ -8,9 +8,16 @@ Shared security reports, review status, and instructions for selected GitHub ski
 - Mode: static analysis only (`--no-llm`); AI analysis is disabled.
 - Cloud scanning: verified through GitHub Actions, including downloadable reports.
 - Upload action: updated to v7.0.0; the Node.js 20 warning was absent in run #2.
-- Approved skill downloads: none yet.
-- Installation and functionality testing: pending.
+- Teach Me: source reviewed for controlled testing; cloud static scan found no issues with complete configured coverage. A source package and installation guide are prepared; organization rollout is not approved.
+- Teach Me ChatGPT installation, basic interactive teaching, and explicitly requested checklist create/update/readback: observed in the current account. Automatic saving and fresh-conversation recovery are not verified.
+- Claude functionality: not yet tested. Chief of Staff remains under review.
 - Access from another team member's account: not independently verified.
+
+## Teach Me download and installation
+
+See [Teach Me: download, install, and test](docs/TEACH-ME-GUIDE.md) for the recorded source version, source download, MIT license, ChatGPT route, proposed Claude route, and exact test limits.
+
+The recorded [learning checklist](tests/teach-me-learning-checklist.md) contains observed learner answers and storage-test results. The [Teach Me cloud report](reports/teach-me-cloud-2026-11-21.json) is retained in this repository in addition to expiring workflow artifacts.
 
 ## Run a cloud scan from your browser
 
@@ -29,7 +36,7 @@ To test updated workflow code, start a new run from **main**. Re-running an olde
 
 ### Scope and usage
 
-The current workflow scans only Chief of Staff and Agent Protocol at the fixed source commit below. It does not accept arbitrary GitHub links, activate skills, or automatically approve downloads.
+**Scan selected skills** scans Chief of Staff and Agent Protocol at their fixed source commit below. **Scan Teach Me** scans Teach Me at commit `10fcc17a274432a871b39fd4b4ec516ea9bf10bb`; download its artifact named `static-review-teach-me`. Neither workflow accepts arbitrary GitHub links, activates skills, or automatically approves downloads.
 
 Runs use the repository owner's GitHub Actions allowance. Each of the two jobs has a 20-minute timeout. Check included compute and artifact-storage usage before repeated runs; do not enable paid usage without the agreed business approval.
 
@@ -50,7 +57,7 @@ The report-preservation step runs even when scan checks fail. If a failure occur
 
 Workflow artifacts are retained for **7 days**, subject to repository policies. Download and preserve reports and provenance needed for the review before expiry. Save later runs under distinct names or folders so earlier evidence is retained.
 
-The `reports/` folder currently holds the original local scan reports. Cloud-run artifacts are separate and are not automatically committed to this repository.
+The `reports/` folder holds the original local scan reports plus the explicitly retained Teach Me cloud report. Other cloud-run artifacts are separate and are not automatically committed to this repository.
 
 ## Candidate under review
 
@@ -93,8 +100,13 @@ This repository does not currently connect ChatGPT or Claude directly to the sca
 
 - `README.md`: browser instructions and current workflow status.
 - `REVIEW-STATUS.md`: initial candidate review and outstanding requirements.
-- `reports/`: original local JSON scan reports.
+- `reports/`: local JSON reports and the retained Teach Me cloud report.
+- `docs/TEACH-ME-GUIDE.md`: download, installation, and test instructions.
+- `downloads/`: versioned Teach Me source ZIP and checksums.
+- `packages/teach-me/`: unchanged upstream skill and MIT license.
+- `tests/`: observed learning progress and checklist-storage test.
 - `.github/workflows/scan-skills.yml`: manually triggered cloud scanner.
+- `.github/workflows/scan-teach-me.yml`: manually triggered Teach Me scanner.
 
 ## Handling files
 
