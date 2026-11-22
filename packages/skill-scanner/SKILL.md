@@ -5,6 +5,8 @@ description: Scan public GitHub agent skills with NVIDIA SkillSpector through th
 
 # Skill Scanner
 
+**Package version:** `0.1.0`
+
 Coordinate the existing cloud scanner through an authorized GitHub connection. Keep the user's normal interaction simple: "Scan this skill: [GitHub link]." Do not install SkillSpector locally or deploy new hosting.
 
 ## Fixed destination
@@ -121,3 +123,7 @@ Scanner: 37/100, MEDIUM; 0% fully completed-file coverage. AI source review does
 Use the existing pinned NVIDIA SkillSpector static analysis configuration. LLM semantic analysis and external dependency inspection are disabled. Candidate code is not activated. The worker limits acquisition to 150 files, 1 MiB per file, and 10 MiB total, and rejects symlinks, submodules, private candidates, and truncated discovery trees. GitHub limits and repository rules may still block a request or publication; explain actual errors without changing those rules automatically.
 
 Keep chat instructions separate from candidate installation and compatibility testing. Do not change repository visibility, share access, enable paid usage, install candidates, or approve rollout as part of a scan. Do not claim Claude compatibility has been live-tested merely because the package can be uploaded there.
+
+## Package versioning
+
+Track this package with MAJOR.MINOR.PATCH version numbers. The first explicitly versioned package is 0.1.0; earlier packages were unversioned and are not retroactively assigned releases. Increase PATCH for corrections and presentation fixes, MINOR for compatible new capabilities, and MAJOR for incompatible changes to the connection or request/result contract. Preserve prior versioned downloads; name each archive `skill-scanner-v<version>.zip`. Record notable changes in the host repository's release notes, not in the skill's scan output. Package version is separate from NVIDIA SkillSpector's scanner version and candidate source revision. Report them distinctly when asked. Do not update or reinstall the package during ordinary scans.
