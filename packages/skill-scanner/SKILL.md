@@ -91,24 +91,24 @@ Keep the detailed reasoning in conversation context or the user's requested deta
 
 ## Plain-language response
 
-Default to 80-140 words plus report/run links. Lead with one status: **No findings in the static scan**, **Needs attention**, **Scanner check incomplete**, or **Scan could not run**. Follow with at most four short bullets:
+Default to 100-180 words plus report/run links. Lead with one status: **No findings in the static scan**, **Needs attention**, **Scanner check incomplete**, or **Scan could not run**. Follow with at most four short bullets:
 
 - What was checked and the practical outcome.
-- What the warnings mean, grouping duplicates without hiding the original count or seriousness.
+- Warning evidence: severity and rule, exact file/line, one short verified snippet or diagnostic, and its plain-language meaning. Group duplicate warnings without hiding their count or seriousness.
 - What the automatic AI source review actually read and found, or its specific access limit.
 - What remains unresolved and the smallest next action, if any.
 
 Use plain prose, normal-sized text, and no table, dashboard, large score heading, or decorative emoji unless the user asks. Do not repeat the submission receipt after the finished result. While waiting, one short update is enough; keep request IDs in context rather than displaying them by default. Do not tell the user to manually investigate files already reviewed by AI.
 
-For mixed findings, mention substantive risks before parser limitations. State the original score/severity and coverage in a single compact line when findings exist or coverage is incomplete. Explain 0% completed-file coverage as `the file was partly checked; its full check did not finish`, not `nothing was scanned`. Do not call all HIGH findings harmless or imply an AI reading completes missing scanner checks. Preserve risk details in the linked JSON report; provide rule IDs, line numbers, versions, and technical evidence only when helpful or requested.
+For mixed findings, mention substantive risks before parser limitations. State the original score/severity and coverage in a single compact line when findings exist or coverage is incomplete. Explain 0% completed-file coverage as `the file was partly checked; its full check did not finish`, not `nothing was scanned`. Do not call all HIGH findings harmless or imply an AI reading completes missing scanner checks. Always retain compact evidence for warnings in the default summary: severity and rule ID, verified file and line locations, and a short source excerpt or parser diagnostic. Link the source at the exact scanned commit and line; use the full report for remaining technical details. Never invent a quote, location, or source link. Clearly label scanner diagnostics as scanner evidence, not malicious source instructions. If more warnings exist than fit, show the most serious distinct groups, disclose the remaining count, and link the full report; do not imply the displayed warnings are exhaustive.
 
-End with **[Full report](verified-report-url) · [Scan run](verified-run-url)** using actual matching GitHub URLs. Never add tracking query parameters. State that a clean static result is not installation approval in one short sentence; avoid repeating that disclaimer. A pending scan needs only its current state and a run link if one has been verified.
+End with **[Full report](verified-report-url) · [Source evidence](verified-pinned-source-url) · [Scan run](verified-run-url)** when source evidence was verified; otherwise omit its link and explain missing access. using actual matching GitHub URLs. Never add tracking query parameters. State that a clean static result is not installation approval in one short sentence; avoid repeating that disclaimer. A pending scan needs only its current state and a run link if one has been verified.
 
 Example shape, using only facts actually verified:
 
 **Scanner check incomplete.** The file was partly checked, but one scanner check could not finish.
 
-- The two warnings point to the same file and describe a scanner parsing limit.
+- **Evidence: two HIGH AE1 warnings, SKILL.md:93 and :197.** Scanner reason: `static_parse_limit`; the affected parser range is lines 161-203. Both warnings refer to the same partly inspected file.
 - I also reviewed the affected text at the scanned version. [Brief evidence-based conclusion.]
 - The scanner gap remains open. [Specific next step, if available.]
 
