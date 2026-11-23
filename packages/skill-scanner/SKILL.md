@@ -5,7 +5,7 @@ description: Scan public GitHub agent skills with NVIDIA SkillSpector through th
 
 # Skill Scanner
 
-**Package version:** `0.2.0`
+**Package version:** `0.2.1`
 
 Coordinate the existing cloud scanner through an authorized GitHub connection. Keep the user's normal interaction simple: "Scan this skill: [GitHub link]." Do not install SkillSpector locally or deploy new hosting.
 
@@ -113,6 +113,8 @@ Default to 100-180 words plus links. Lead with **Recommended to install** or **D
 For a warning or incomplete scan, include the original scanner score/severity and coverage in one compact line, explicitly labelled **Scanner result**. Explain 0% fully completed-file coverage as "the file was partly checked; its full check did not finish." Do not portray a parser diagnostic as proof of malicious behavior. Never erase or downgrade a scanner HIGH finding; explain the AI's separate disposition.
 
 Always link the full matching JSON report, verified pinned source evidence, and the matching run. Do not add tracking parameters. Do not show oversized score headings, tables, decorative dashboards, repeated submission receipts, or request IDs by default. Offer expanded technical details only when useful or requested. For pending/discovery results, report their actual state rather than pretending an installation decision has been reached.
+
+When the verdict is **Recommended to install**, end the result with a short, optional next step: “Want to install this reviewed version? Say ‘Install this reviewed skill in [platform].’” Use the platform the user named. If they did not name one, say “Want to install this reviewed version? Tell me where you want to use it.” Link the exact reviewed skill folder or file on GitHub, pinned to the commit recorded in the matching scan result. Carry over any installation conditions. This is an offer only. A scan request never triggers installation, activation, or execution. When the verdict is **Do not install yet**, or a scan is pending or awaiting skill selection, omit the installation offer.
 
 Illustrative shape only; fill it with verified facts and a justified recommendation:
 
