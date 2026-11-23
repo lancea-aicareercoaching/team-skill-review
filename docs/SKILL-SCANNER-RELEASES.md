@@ -2,6 +2,12 @@
 
 Use MAJOR.MINOR.PATCH for portable Skill Scanner packages. This version is separate from NVIDIA SkillSpector's version and the scanned skill's source commit. Earlier downloads were unversioned; no historical release numbers have been invented.
 
+## 0.2.1 — November 23, 2026
+
+- Add a short installation offer after a positive review. Link the exact reviewed GitHub commit and skill folder, and carry over any installation conditions.
+- Omit the offer for blocked, pending, or discovery results. Scanning never installs or activates the candidate.
+- Release artifact: skill-scanner-v0.2.1.zip.
+
 ## 0.2.0 — November 22, 2026
 
 - Investigate incomplete checks automatically, including relevant same-repository supporting files at the exact scanned commit, with explicit review bounds and provenance.
