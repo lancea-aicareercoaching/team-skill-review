@@ -64,7 +64,7 @@ Both completed scan runs had successful scanning and publishing jobs. The Chief 
 
 A reusable installed chat skill is still pending: personal skill storage could not be accessed from this execution session, including the supported alternative connection. The instructions above are saved and usable in this conversation; they are not an installed skill. Claude connectivity and another account's access remain unverified. Installation and functionality testing of scanned skills are Part 2.
 
-## Version 0.2.0: investigation and installation recommendations
+## Version 0.2.1: investigation and installation recommendations
 
 This updates chat interpretation and presentation without changing workflow routing or the cloud scanner configuration. The portable package version is separate from NVIDIA SkillSpector's version. Follow these rules when explaining results; an installation recommendation never changes the original scanner evidence.
 
@@ -103,6 +103,8 @@ Default to 100-180 words plus links. Lead with **Recommended to install** or **D
 For a warning or incomplete scan, include the original scanner score/severity and coverage in one compact line, explicitly labelled **Scanner result**. Explain 0% fully completed-file coverage as "the file was partly checked; its full check did not finish." Do not portray a parser diagnostic as proof of malicious behavior. Never erase or downgrade a scanner HIGH finding; explain the AI's separate disposition.
 
 Always link the full matching JSON report, verified pinned source evidence, and the matching run. Do not add tracking parameters. Do not show oversized score headings, tables, decorative dashboards, repeated submission receipts, or request IDs by default. Offer expanded technical details only when useful or requested. For pending/discovery results, report their actual state rather than pretending an installation decision has been reached.
+
+When the verdict is **Recommended to install**, end the result with a short, optional next step: “Want to install this reviewed version? Say ‘Install this reviewed skill in [platform].’” Use the platform the user named. If they did not name one, say “Want to install this reviewed version? Tell me where you want to use it.” Link the exact reviewed skill folder or file on GitHub, pinned to the commit recorded in the matching scan result. Carry over any installation conditions. This is an offer only. A scan request never triggers installation, activation, or execution. When the verdict is **Do not install yet**, or a scan is pending or awaiting skill selection, omit the installation offer.
 
 Illustrative shape only; fill it with verified facts and a justified recommendation:
 
