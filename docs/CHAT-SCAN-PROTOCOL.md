@@ -6,6 +6,17 @@ Ask: **Scan this GitHub skill: [link].** The assistant submits a request, GitHub
 
 This connection supports public GitHub repositories containing regular SKILL.md files. It scans one selected skill folder per request, not an entire repository security audit. Private candidate repositories and ZIP uploads are not supported by this initial version. The scanning repository itself stays private.
 
+## Repository-type decision (November 2026)
+
+The GitHub worker reports `repository_kind` as `ai_skill`, `software_program`, `software_program_with_skills`, or `undetermined` based on the pinned source tree. This is a structural classification, **not a security finding or a guarantee**.
+
+- AI skill: use the existing selected-folder SkillSpector scan. A repository with several skill folders still requires a folder choice.
+- Software program with embedded skills: if the request has no `skill_path`, return `needs_target_selection` with the detected type and matching skill folders. Ask whether the user wants one specific AI skill scanned, or a full-program review. Do not claim the skill-folder scan covers the full program.
+- Software program without a selected skill: return `program_review_required`. This is a non-scanned result, not a security verdict.
+- A specified `skill_path` always means the user requests only that AI skill, not a whole-program review.
+
+The present workflow does **not** perform a full-program security audit. A separate authorized CodeQL/dependency and source-review workflow must be implemented and tested before labeling any result a program security scan. Never install or launch candidate applications during review. If program auditing is unavailable, explain that gap, offer the next best read-only analysis, and do not approve GitHub publication as a verified safe program on the basis of a skill-only scan.
+
 ## Connection requirements
 
 The assistant needs an authorized GitHub tool that can create files in `lancea-aicareercoaching/team-skill-review` and read files back. A skill provides instructions, not credentials or new tools. Verify these capabilities separately in ChatGPT and Claude; a read-only connection cannot submit scans. GitHub may show a connection approval prompt.
