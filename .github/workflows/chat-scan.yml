@@ -65,3 +65,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REQUEST_ID: ${{ needs.scan.outputs.request_id }}
         run: python3 scripts/chat_scan.py publish "chat-results/$REQUEST_ID"
+      - name: Register exact-source skill result for team reuse
+        if: success()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUEST_ID: ${{ needs.scan.outputs.request_id }}
+        run: python3 scripts/skill_cache.py "chat-results/$REQUEST_ID"
