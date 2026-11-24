@@ -1,0 +1,9 @@
+{
+  "repository_url": "https://github.com/HKUDS/DeepTutor",
+  "source_commit": "1284116f92368480aef3a47f91b8df9e9b105062",
+  "pipeline_version": "program-v2",
+  "request_id": "scan-20261125-deeptutor-f6c924b18d",
+  "recommendation": "Do not install yet",
+  "result_path": ".scan-results/scan-20261125-deeptutor-f6c924b18d/result.json",
+  "report_path": ".scan-results/scan-20261125-deeptutor-f6c924b18d/report.json"
+}
