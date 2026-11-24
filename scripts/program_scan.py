@@ -83,14 +83,25 @@ def summarize():
             report["osv"]["status"]=osv
     else:
         report["osv"]["status"]="incomplete"
-    if report["codeql"]["status"]=="incomplete" or report["osv"]["status"]=="incomplete":
+    embedded_file=folder/"skills.json"
+    embedded_status=os.environ.get("EMBEDDED_STATUS","unknown")
+    if embedded_status=="success" and embedded_file.is_file():
+        embedded=json.loads(embedded_file.read_text())
+        if embedded.get("status") not in {"complete","partial","none_found"} or not isinstance(embedded.get("results"),list):
+            embedded={"status":"incomplete","results":[],"error":"Invalid embedded-skill report"}
+    else:
+        embedded={"status":"incomplete","results":[],"error":"Embedded skill scan did not complete"}
+    report["embedded_skills"]=embedded
+    has_skill_findings=any((item.get("findings") or 0)>0 or (item.get("risk_severity") or "").upper() in {"MEDIUM","HIGH","CRITICAL"} for item in embedded.get("results",[]))
+    if report["codeql"]["status"]=="incomplete" or report["osv"]["status"]=="incomplete" or embedded["status"] in {"partial","incomplete"}:
         state="incomplete"
-    elif report["codeql"]["sarif_findings"] or report["osv"]["vulnerabilities"]:
+    elif report["codeql"]["sarif_findings"] or report["osv"]["vulnerabilities"] or has_skill_findings:
         state="needs_review"
     else:
         state="review_required"
     report["state"]=state
     summary={key:report[key] for key in ["schema_version","target_kind","request_id","repository_url","source_commit","scan_mode","state","codeql","osv","review_required","publication_approved"]}
+    summary["embedded_skills"]={"status":embedded.get("status"),"discovered_count":embedded.get("discovered_count"),"selected_count":embedded.get("selected_count"),"findings":sum(v.get("findings") or 0 for v in embedded.get("results",[]))}
     summary["report_path"]=f".scan-results/{rid}/report.json"
     summary["run_url"]=os.getenv("GITHUB_SERVER_URL","https://github.com")+"/"+os.getenv("GITHUB_REPOSITORY","lancea-aicareercoaching/team-skill-review")+"/actions/runs/"+os.getenv("GITHUB_RUN_ID","")
     (folder/"result.json").write_text(json.dumps(summary,indent=2)+"\n")
