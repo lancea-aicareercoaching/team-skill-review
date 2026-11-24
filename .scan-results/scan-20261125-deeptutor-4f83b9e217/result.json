@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "target_kind": "software_program",
+  "request_id": "scan-20261125-deeptutor-4f83b9e217",
+  "repository_url": "https://github.com/HKUDS/DeepTutor",
+  "source_commit": "1284116f92368480aef3a47f91b8df9e9b105062",
+  "scan_mode": "static_code_and_dependency",
+  "state": "needs_review",
+  "codeql": {
+    "status": "success",
+    "sarif_findings": 499
+  },
+  "osv": {
+    "status": "findings",
+    "vulnerabilities": 519,
+    "sources_checked": 5
+  },
+  "review_required": true,
+  "publication_approved": false,
+  "report_path": ".scan-results/scan-20261125-deeptutor-4f83b9e217/report.json",
+  "run_url": "https://github.com/lancea-aicareercoaching/team-skill-review/actions/runs/45438178176"
+}
