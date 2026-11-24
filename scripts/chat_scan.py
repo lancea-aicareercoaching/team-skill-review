@@ -282,14 +282,19 @@ def publish(folder, api=github_api):
     status = json.loads((Path(folder) / "result.json").read_text(encoding="utf-8"))
     if status.get("request_id") != rid:
         raise ValueError("Result does not match request")
-    for name in ("report.json", "result.json"):
+    for name in ("report.json", "decision.md", "result.json"):
         file = Path(folder) / name
         if not file.exists():
             continue
         if file.is_symlink() or not file.is_file() or file.stat().st_size > 2 * MAX_RESPONSE:
             raise ValueError("Unsafe result artifact")
         content = file.read_bytes()
-        json.loads(content)
+        if name.endswith(".json"):
+            json.loads(content)
+        elif name == "decision.md":
+            if len(content) > 16384:
+                raise ValueError("Decision note too large")
+            content.decode("utf-8")
         endpoint = f"/repos/{repo}/contents/.scan-results/{rid}/{name}"
         # Create only. Existing results must not silently be overwritten.
         api(endpoint, token=token, method="PUT", data={"message": f"Record scan {rid}: {name}", "branch": "main",
