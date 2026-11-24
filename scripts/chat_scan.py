@@ -299,6 +299,52 @@ def publish(folder, api=github_api):
         # Create only. Existing results must not silently be overwritten.
         api(endpoint, token=token, method="PUT", data={"message": f"Record scan {rid}: {name}", "branch": "main",
                                                      "content": base64.b64encode(content).decode()})
+    if status.get("target_kind") == "software_program":
+        try:
+            publish_program_cache(status, api=api)
+        except (ValueError, OSError) as exc:
+            print(f"Warning: scan result published but reusable index was not saved: {exc}", file=sys.stderr)
+
+
+
+def publish_program_cache(status, api=github_api):
+    """Register completed immutable-source result for reuse by all team members.
+    Fresh scans still publish their own reports; cache aliases never overwrite reviews.
+    """
+    if status.get("target_kind") != "software_program" or status.get("pipeline_version") != "program-v2":
+        return
+    if status.get("recommendation") not in {"Recommended to install", "Do not install yet"}:
+        return
+    source = status.get("repository_url", "")
+    parsed = urllib.parse.urlsplit(source)
+    parts = parsed.path.strip("/").split("/")
+    commit = status.get("source_commit", "")
+    if parsed.scheme != "https" or parsed.netloc != "github.com" or len(parts) != 2 or any(
+        not NAME_RE.fullmatch(p) or p in {".", ".."} for p in parts
+    ) or not re.fullmatch(r"[0-9a-f]{40}", commit):
+        raise ValueError("Cannot cache an unverified program source")
+    key = f".scan-cache/program-v2/{parts[0]}/{parts[1]}/{commit}.json"
+    entry = {"repository_url": source, "source_commit": commit, "pipeline_version": "program-v2",
+             "request_id": status["request_id"], "recommendation": status["recommendation"],
+             "result_path": f".scan-results/{status['request_id']}/result.json",
+             "report_path": f".scan-results/{status['request_id']}/report.json"}
+    destination = os.environ["GITHUB_REPOSITORY"]
+    endpoint = f"/repos/{destination}/contents/{key}"
+    payload = {"message": f"Index reusable program scan {status['request_id']}",
+               "branch": "main", "content": base64.b64encode(
+                   (json.dumps(entry, indent=2) + "\n").encode()).decode()}
+    # A previously completed identical source/pipeline has a valid reusable entry.
+    # Never replace it automatically. "Fresh" scans remain separate immutable results.
+    try:
+        existing = api(endpoint, token=os.environ["GH_TOKEN"])
+        if existing.get("type") == "file":
+            print(f"Reusable program scan index exists: {key}")
+            return
+    except ValueError as exc:
+        if "HTTP 404" not in str(exc):
+            raise
+    api(endpoint, token=os.environ["GH_TOKEN"], method="PUT", data=payload)
+    print(f"Saved reusable scan index: {key}")
 
 if __name__ == "__main__":
     if sys.argv[1] == "select":
