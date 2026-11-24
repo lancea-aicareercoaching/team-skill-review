@@ -80,12 +80,27 @@ jobs:
           else
             echo "status=incomplete" >> "$GITHUB_OUTPUT"
           fi
+      - name: Install pinned SkillSpector for embedded skill instructions
+        id: skillspector_install
+        continue-on-error: true
+        run: |
+          python3 -m venv "$RUNNER_TEMP/embedded-skillspector"
+          "$RUNNER_TEMP/embedded-skillspector/bin/pip" install "git+https://github.com/NVIDIA/skillspector.git@a09091e0ebf6c96ff327457529d7b0d372125884"
+          echo "$RUNNER_TEMP/embedded-skillspector/bin" >> "$GITHUB_PATH"
+      - name: Analyze embedded SKILL.md files (bounded and read-only)
+        id: embedded_skills
+        if: steps.skillspector_install.outcome == 'success'
+        continue-on-error: true
+        env:
+          REQUEST_ID: ${{ steps.request.outputs.request_id }}
+        run: python3 scripts/scan_embedded_skills.py
       - name: Summarize verified evidence; never auto-approve software
         if: always() && steps.request.outcome == 'success'
         env:
           REQUEST_ID: ${{ steps.request.outputs.request_id }}
           CODEQL_STATUS: ${{ steps.codeql.outcome }}
           OSV_STATUS: ${{ steps.osv.outputs.status }}
+          EMBEDDED_STATUS: ${{ steps.embedded_skills.outcome }}
         run: python3 scripts/program_scan.py summarize
       - name: Preserve program report
         if: always() && steps.request.outcome == 'success'
