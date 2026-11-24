@@ -1,0 +1,204 @@
+{
+  "schema_version": 2,
+  "target_kind": "software_program",
+  "request_id": "scan-20261125-deeptutor-a831e67c29",
+  "repository_url": "https://github.com/HKUDS/DeepTutor",
+  "source_commit": "1284116f92368480aef3a47f91b8df9e9b105062",
+  "pipeline_version": "program-v2",
+  "scan_mode": "static_code_and_dependency",
+  "codeql": {
+    "status": "incomplete",
+    "sarif_findings": null
+  },
+  "osv": {
+    "status": "findings",
+    "vulnerabilities": 519,
+    "sources_checked": 5
+  },
+  "limitations": [
+    "Not a full security guarantee",
+    "No candidate application installation, startup, tests, or build was authorized",
+    "Only supported CodeQL languages and OSV-recognized package inventories are covered",
+    "External runtime services, secrets handling, and dynamic behavior are not verified"
+  ],
+  "review_required": true,
+  "publication_approved": false,
+  "embedded_skills": {
+    "status": "complete",
+    "discovered_count": 6,
+    "scan_limit": 12,
+    "selected_count": 6,
+    "scope": "SKILL.md instruction file only; adjacent scripts/dependencies not covered",
+    "results": [
+      {
+        "path": "SKILL.md",
+        "status": "complete",
+        "findings": 1,
+        "sha256": "1eca34a7674b2b4cdc8039575281d5b85d457c3f1d8257bc4b42825d116336ec",
+        "risk_score": 8,
+        "risk_severity": "LOW",
+        "issues": [
+          {
+            "id": "EA2",
+            "severity": "MEDIUM",
+            "description": ""
+          }
+        ]
+      },
+      {
+        "path": "deeptutor/skills/builtin/docx/SKILL.md",
+        "status": "complete",
+        "findings": 0,
+        "sha256": "66afa8c19a53db613ecdd7e45709210db66b8937638325b15c054e8df719f5f6",
+        "risk_score": 0,
+        "risk_severity": "LOW",
+        "issues": []
+      },
+      {
+        "path": "deeptutor/skills/builtin/pdf/SKILL.md",
+        "status": "complete",
+        "findings": 1,
+        "sha256": "c950efb9d180879b978f765cfc0e6f217669231a62e618054ebff6df1002a8e3",
+        "risk_score": 7,
+        "risk_severity": "LOW",
+        "issues": [
+          {
+            "id": "EA2",
+            "severity": "MEDIUM",
+            "description": ""
+          }
+        ]
+      },
+      {
+        "path": "deeptutor/skills/builtin/pptx/SKILL.md",
+        "status": "complete",
+        "findings": 0,
+        "sha256": "72e6ecbc8b3194bfbd2d4230abbbd0df2e1f1bfaa5348f0b05b778475edfd009",
+        "risk_score": 0,
+        "risk_severity": "LOW",
+        "issues": []
+      },
+      {
+        "path": "deeptutor/skills/builtin/skill-creator/SKILL.md",
+        "status": "complete",
+        "findings": 0,
+        "sha256": "158a8544c752c7aca824d74d51bd3d59b70e36369218d22b52424d4054109b18",
+        "risk_score": 0,
+        "risk_severity": "LOW",
+        "issues": []
+      },
+      {
+        "path": "deeptutor/skills/builtin/xlsx/SKILL.md",
+        "status": "complete",
+        "findings": 0,
+        "sha256": "9f5e476f8692ff737bf3251d00e71e52e9b6a9f3837b78914f428022fba89868",
+        "risk_score": 0,
+        "risk_severity": "LOW",
+        "issues": []
+      }
+    ]
+  },
+  "state": "incomplete",
+  "recommendation": "Do not install yet",
+  "recommendation_reason": "At least one scanner or its evidence is incomplete.",
+  "triage": {
+    "codeql_unique_rule_locations": 0,
+    "codeql_levels": {},
+    "codeql_examples": [],
+    "osv_distinct_vulnerability_ids": 386,
+    "osv_examples": [
+      {
+        "id": "GHSA-22hg-r758-rrw9",
+        "packages": [
+          "pillow"
+        ]
+      },
+      {
+        "id": "GHSA-238p-pmpm-9mq7",
+        "packages": [
+          "katex"
+        ]
+      },
+      {
+        "id": "GHSA-24c4-3p7v-29cm",
+        "packages": [
+          "aiohttp"
+        ]
+      },
+      {
+        "id": "GHSA-24rc-8hj2-v98c",
+        "packages": [
+          "pillow"
+        ]
+      },
+      {
+        "id": "GHSA-254f-3936-288h",
+        "packages": [
+          "pillow"
+        ]
+      },
+      {
+        "id": "GHSA-27h8-gf7j-v5hc",
+        "packages": [
+          "pillow"
+        ]
+      },
+      {
+        "id": "GHSA-2883-xcg3-v3hh",
+        "packages": [
+          "js-yaml"
+        ]
+      },
+      {
+        "id": "GHSA-28qf-cpwq-vmc2",
+        "packages": [
+          "aiohttp"
+        ]
+      },
+      {
+        "id": "GHSA-2fqr-mr3j-6wp8",
+        "packages": [
+          "aiohttp"
+        ]
+      },
+      {
+        "id": "GHSA-2g87-pp6c-29x5",
+        "packages": [
+          "aiohttp"
+        ]
+      },
+      {
+        "id": "GHSA-2gqq-gqf2-x968",
+        "packages": [
+          "undici"
+        ]
+      },
+      {
+        "id": "GHSA-2jfj-6hjv-fm6j",
+        "packages": [
+          "undici"
+        ]
+      },
+      {
+        "id": "GHSA-2jhm-w3mp-jcwr",
+        "packages": [
+          "nltk"
+        ]
+      },
+      {
+        "id": "GHSA-2m5v-pch6-74hx",
+        "packages": [
+          "undici"
+        ]
+      },
+      {
+        "id": "GHSA-2v8p-3f2j-5mp7",
+        "packages": [
+          "mermaid"
+        ]
+      }
+    ],
+    "embedded_skill_findings": 2
+  },
+  "recommendation_scope": "Advisory assessment of configured static checks only; never automatic installation or publication."
+}
