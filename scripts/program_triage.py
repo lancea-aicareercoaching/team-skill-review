@@ -17,7 +17,7 @@ def analyze(rid):
     distinct_locations = set()
     codeql_examples = []
     severities = collections.Counter()
-    for path in sorted((folder / "sarif").rglob("*.sarif")) if (folder / "sarif").exists() else []:
+    for path in (sorted((folder / "sarif").rglob("*.sarif")) if (folder / "sarif").exists() and report.get("codeql",{}).get("status") == "success" else []):
         data = json.loads(path.read_text())
         for run in data.get("runs", []):
             rules = {r.get("id"): r for r in run.get("tool", {}).get("driver", {}).get("rules", [])}
@@ -37,7 +37,7 @@ def analyze(rid):
                       "message":str(issue.get("message",{}).get("text",""))[:220]})
     vulnerabilities = collections.defaultdict(set)
     osv_file = folder / "osv.json"
-    if osv_file.exists():
+    if osv_file.exists() and report.get("osv",{}).get("status") in ("success","findings"):
         osv = json.loads(osv_file.read_text())
         for group in osv.get("results", []):
             for package in group.get("packages", []):
