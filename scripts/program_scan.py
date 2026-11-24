@@ -63,32 +63,43 @@ def summarize():
     sarifdir=folder/"sarif"
     sarifs=list(sarifdir.rglob("*.sarif")) if sarifdir.exists() else []
     if codeql=="success" and sarifs:
-        count=0
-        for file in sarifs:
-            data=json.loads(file.read_text())
-            for run in data.get("runs",[]):count+=len(run.get("results",[]))
-        report["codeql"]["sarif_findings"]=count
+        try:
+            count=0
+            for file in sarifs:
+                data=json.loads(file.read_text())
+                for run in data.get("runs",[]):count+=len(run.get("results",[]))
+            report["codeql"]["sarif_findings"]=count
+        except (ValueError, TypeError, OSError) as exc:
+            report["codeql"]["status"]="incomplete"
+            report["codeql"]["error"]="Unusable or malformed SARIF evidence"
     else:
         report["codeql"]["status"]="incomplete"
     osvfile=folder/"osv.json"
     if osv in {"success","findings"} and osvfile.is_file():
-        data=json.loads(osvfile.read_text())
-        sources=data.get("results",[])
-        if not isinstance(sources,list) or not sources:
+        try:
+            data=json.loads(osvfile.read_text())
+            sources=data.get("results",[])
+            if not isinstance(sources,list) or not sources:
+                report["osv"]["status"]="incomplete"
+                report["osv"]["explanation"]="No recognized dependency inventory was reported."
+            else:
+                report["osv"]["sources_checked"]=len(sources)
+                report["osv"]["vulnerabilities"]=sum(len(p.get("vulnerabilities",[])) for source in sources for p in source.get("packages",[]))
+                report["osv"]["status"]=osv
+        except (ValueError, TypeError, OSError):
             report["osv"]["status"]="incomplete"
-            report["osv"]["explanation"]="No recognized dependency inventory was reported."
-        else:
-            report["osv"]["sources_checked"]=len(sources)
-            report["osv"]["vulnerabilities"]=sum(len(p.get("vulnerabilities",[])) for source in sources for p in source.get("packages",[]))
-            report["osv"]["status"]=osv
+            report["osv"]["explanation"]="Unusable or malformed dependency evidence."
     else:
         report["osv"]["status"]="incomplete"
     embedded_file=folder/"skills.json"
     embedded_status=os.environ.get("EMBEDDED_STATUS","unknown")
     if embedded_status=="success" and embedded_file.is_file():
-        embedded=json.loads(embedded_file.read_text())
-        if embedded.get("status") not in {"complete","partial","none_found"} or not isinstance(embedded.get("results"),list):
-            embedded={"status":"incomplete","results":[],"error":"Invalid embedded-skill report"}
+        try:
+            embedded=json.loads(embedded_file.read_text())
+            if embedded.get("status") not in {"complete","partial","none_found"} or not isinstance(embedded.get("results"),list):
+                embedded={"status":"incomplete","results":[],"error":"Invalid embedded-skill report"}
+        except (ValueError, TypeError, OSError):
+            embedded={"status":"incomplete","results":[],"error":"Unusable embedded-skill evidence"}
     else:
         embedded={"status":"incomplete","results":[],"error":"Embedded skill scan did not complete"}
     report["embedded_skills"]=embedded
