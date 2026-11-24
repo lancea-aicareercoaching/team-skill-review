@@ -112,6 +112,22 @@ def source_tree(request, api=github_api):
             skills.append(folder)
     return sha, entries, sorted(set(skills))
 
+def repository_kind(entries, skills):
+    """Classify broad repository shape; not a security verdict."""
+    paths = {e.get("path", "") for e in entries if e.get("type") == "blob"}
+    program_markers = {"pyproject.toml", "setup.py", "package.json", "Cargo.toml",
+                       "go.mod", "pom.xml", "requirements.txt", "Dockerfile",
+                       "compose.yml", "docker-compose.yml"}
+    has_program = bool(paths & program_markers)
+    if has_program and skills:
+        return "software_program_with_skills"
+    if has_program:
+        return "software_program"
+    if skills:
+        return "ai_skill"
+    return "undetermined"
+
+
 def select_skill(requested, skills):
     if not skills:
         raise ValueError("No regular SKILL.md files found; this is not a general repository audit")
@@ -195,10 +211,26 @@ def run_request(request_path, output_root=Path("chat-results"), api=github_api, 
             raise ValueError("Only public candidate repositories are supported")
         sha, entries, skills = source_tree(request, source_api)
         result["source_commit"] = sha
-        selected = select_skill(request["skill_path"], skills)
-        if selected is None:
-            result.update(state="needs_selection", skills=skills[:30], skill_count=len(skills), choices_truncated=len(skills) > 30)
+        kind = repository_kind(entries, skills)
+        result["repository_kind"] = kind
+        result["skill_count"] = len(skills)
+        if kind in {"software_program", "software_program_with_skills"} and request["skill_path"] is None:
+            # Do not silently substitute a SKILL.md scan for a program security audit.
+            result.update(state="needs_target_selection", target_kind="software_program",
+                          skills=skills[:30], choices_truncated=len(skills) > 30,
+                          explanation="This repository contains software. An AI skill scan would not audit the full application. Choose a specific skill_path to scan just that skill, or use a separately approved program security workflow.")
+            selected = None
+        elif not skills:
+            result.update(state="program_review_required", target_kind="software_program",
+                          explanation="No regular SKILL.md was found; the current SkillSpector workflow cannot audit the full program.")
+            selected = None
         else:
+            selected = select_skill(request["skill_path"], skills)
+            if selected is None:
+                result.update(state="needs_selection", target_kind="ai_skill",
+                              skills=skills[:30], skill_count=len(skills), choices_truncated=len(skills) > 30)
+        if selected is not None:
+            result["target_kind"] = "ai_skill"
             result["skill_path"] = selected
             with tempfile.TemporaryDirectory(prefix="skill-review-") as temp:
                 folder = Path(temp) / "candidate"
