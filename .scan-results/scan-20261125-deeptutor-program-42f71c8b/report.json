@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "target_kind": "software_program",
+  "request_id": "scan-20261125-deeptutor-program-42f71c8b",
+  "repository_url": "https://github.com/HKUDS/DeepTutor",
+  "source_commit": "1284116f92368480aef3a47f91b8df9e9b105062",
+  "scan_mode": "static_code_and_dependency",
+  "codeql": {
+    "status": "success",
+    "sarif_findings": 499
+  },
+  "osv": {
+    "status": "findings",
+    "vulnerabilities": 519
+  },
+  "limitations": [
+    "Not a full security guarantee",
+    "No candidate application installation, startup, tests, or build was authorized",
+    "Only supported CodeQL languages and OSV-recognized package inventories are covered",
+    "External runtime services, secrets handling, and dynamic behavior are not verified"
+  ],
+  "review_required": true,
+  "publication_approved": false,
+  "state": "needs_review"
+}
