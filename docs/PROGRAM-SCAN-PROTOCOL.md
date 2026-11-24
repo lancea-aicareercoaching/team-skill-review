@@ -17,4 +17,10 @@ Use `.github/workflows/program-scan.yml` for **software programs**, without repl
 
 **Important:** The first program-scan workflow is new and must be tested. A successful GitHub Actions status alone doesn't indicate a passed security scan. Never install DeepTutor; the program test, if requested, is read-only.
 
+## Automated findings triage and binary recommendation
+
+Every new program run now executes `scripts/program_triage.py` after the scanners and report assembly. It groups repeated CodeQL locations, counts distinct OSV vulnerability IDs, includes embedded SkillSpector findings, and writes the binary advisory `recommendation` in the committed `result.json` and `report.json`, plus a concise `decision.md`. The only completed advisory choices are **Recommended to install** and **Do not install yet**; missing or incomplete checks produce the latter, not a false safe result. The finding counters do not automatically prove exploitability; a clean static result also cannot guarantee safety. Installation and publication always require separate explicit approval.
+
+For in-chat checking, discover the matching workflow run using the authenticated REST endpoint `https://api.github.com/repos/lancea-aicareercoaching/team-skill-review/actions/runs?per_page=20`, matching the request-creation commit SHA. Inspect its scan/publish jobs with GitHub workflow-run-jobs. A missing result while a matching scan job is running is normal, not a reason to submit a duplicate. A completed publisher with missing result needs a publication investigation. GitHub can finish and publish while chat is inactive, but there is **no automatic callback into an inactive ChatGPT chat**; optional proactive notifications need a separately connected and approved channel.
+
 **Default routing:** A repository-root link for a software program uses the combined program job without requiring the user to separately request SKILL.md checks; a direct link to an individual SKILL.md uses the AI-skill workflow. This is on-demand per link, not scheduled monitoring of repositories.
