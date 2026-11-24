@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "target_kind": "software_program",
+  "request_id": "scan-20261125-deeptutor-b7e29c41a6",
+  "repository_url": "https://github.com/HKUDS/DeepTutor",
+  "source_commit": "1284116f92368480aef3a47f91b8df9e9b105062",
+  "scan_mode": "static_code_and_dependency",
+  "codeql": {
+    "status": "success",
+    "sarif_findings": 499
+  },
+  "osv": {
+    "status": "findings",
+    "vulnerabilities": 519,
+    "sources_checked": 5
+  },
+  "limitations": [
+    "Not a full security guarantee",
+    "No candidate application installation, startup, tests, or build was authorized",
+    "Only supported CodeQL languages and OSV-recognized package inventories are covered",
+    "External runtime services, secrets handling, and dynamic behavior are not verified"
+  ],
+  "review_required": true,
+  "publication_approved": false,
+  "embedded_skills": {
+    "status": "complete",
+    "discovered_count": 6,
+    "scan_limit": 12,
+    "selected_count": 6,
+    "scope": "SKILL.md instruction file only; adjacent scripts/dependencies not covered",
+    "results": [
+      {
+        "path": "SKILL.md",
+        "status": "complete",
+        "findings": 1,
+        "sha256": "1eca34a7674b2b4cdc8039575281d5b85d457c3f1d8257bc4b42825d116336ec",
+        "risk_score": 8,
+        "risk_severity": "LOW",
+        "issues": [
+          {
+            "id": "EA2",
+            "severity": "MEDIUM",
+            "description": ""
+          }
+        ]
+      },
+      {
+        "path": "deeptutor/skills/builtin/docx/SKILL.md",
+        "status": "complete",
+        "findings": 0,
+        "sha256": "66afa8c19a53db613ecdd7e45709210db66b8937638325b15c054e8df719f5f6",
+        "risk_score": 0,
+        "risk_severity": "LOW",
+        "issues": []
+      },
+      {
+        "path": "deeptutor/skills/builtin/pdf/SKILL.md",
+        "status": "complete",
+        "findings": 1,
+        "sha256": "c950efb9d180879b978f765cfc0e6f217669231a62e618054ebff6df1002a8e3",
+        "risk_score": 7,
+        "risk_severity": "LOW",
+        "issues": [
+          {
+            "id": "EA2",
+            "severity": "MEDIUM",
+            "description": ""
+          }
+        ]
+      },
+      {
+        "path": "deeptutor/skills/builtin/pptx/SKILL.md",
+        "status": "complete",
+        "findings": 0,
+        "sha256": "72e6ecbc8b3194bfbd2d4230abbbd0df2e1f1bfaa5348f0b05b778475edfd009",
+        "risk_score": 0,
+        "risk_severity": "LOW",
+        "issues": []
+      },
+      {
+        "path": "deeptutor/skills/builtin/skill-creator/SKILL.md",
+        "status": "complete",
+        "findings": 0,
+        "sha256": "158a8544c752c7aca824d74d51bd3d59b70e36369218d22b52424d4054109b18",
+        "risk_score": 0,
+        "risk_severity": "LOW",
+        "issues": []
+      },
+      {
+        "path": "deeptutor/skills/builtin/xlsx/SKILL.md",
+        "status": "complete",
+        "findings": 0,
+        "sha256": "9f5e476f8692ff737bf3251d00e71e52e9b6a9f3837b78914f428022fba89868",
+        "risk_score": 0,
+        "risk_severity": "LOW",
+        "issues": []
+      }
+    ]
+  },
+  "state": "needs_review"
+}
