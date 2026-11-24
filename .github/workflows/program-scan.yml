@@ -102,6 +102,11 @@ jobs:
           OSV_STATUS: ${{ steps.osv.outputs.status }}
           EMBEDDED_STATUS: ${{ steps.embedded_skills.outcome }}
         run: python3 scripts/program_scan.py summarize
+      - name: Automatically triage findings and create final recommendation
+        if: always() && steps.request.outcome == 'success'
+        env:
+          REQUEST_ID: ${{ steps.request.outputs.request_id }}
+        run: python3 scripts/program_triage.py
       - name: Preserve program report
         if: always() && steps.request.outcome == 'success'
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
