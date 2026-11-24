@@ -6,16 +6,14 @@ Ask: **Scan this GitHub skill: [link].** The assistant submits a request, GitHub
 
 This connection supports public GitHub repositories containing regular SKILL.md files. It scans one selected skill folder per request, not an entire repository security audit. Private candidate repositories and ZIP uploads are not supported by this initial version. The scanning repository itself stays private.
 
-## Repository-type decision (November 2026)
+## Repository classification and routing (November 2026)
 
-The GitHub worker reports `repository_kind` as `ai_skill`, `software_program`, `software_program_with_skills`, or `undetermined` based on the pinned source tree. This is a structural classification, **not a security finding or a guarantee**.
+The GitHub worker classifies a pinned repository tree as `ai_skill`, `software_program`, `software_program_with_skills`, or `undetermined`. Classification describes structure, not safety.
 
-- AI skill: use the existing selected-folder SkillSpector scan. A repository with several skill folders still requires a folder choice.
-- Software program with embedded skills: if the request has no `skill_path`, return `needs_target_selection` with the detected type and matching skill folders. Ask whether the user wants one specific AI skill scanned, or a full-program review. Do not claim the skill-folder scan covers the full program.
-- Software program without a selected skill: return `program_review_required`. This is a non-scanned result, not a security verdict.
-- A specified `skill_path` always means the user requests only that AI skill, not a whole-program review.
-
-The present workflow does **not** perform a full-program security audit. A separate authorized CodeQL/dependency and source-review workflow must be implemented and tested before labeling any result a program security scan. Never install or launch candidate applications during review. If program auditing is unavailable, explain that gap, offer the next best read-only analysis, and do not approve GitHub publication as a verified safe program on the basis of a skill-only scan.
+- A **direct SKILL.md URL or selected skill folder** uses this `chat-scan.yml` SkillSpector workflow.
+- A **software repository root**, including one with embedded SKILL.md files, uses the separate team-wide `program-scan.yml` pipeline. Its preparation job pins a source commit; CodeQL, OSV and embedded SkillSpector then scan in parallel, and evidence aggregation and triage write a binary advisory. See [Program scan protocol](PROGRAM-SCAN-PROTOCOL.md).
+- **Normal program scans** first check the immutable-source cache `.scan-cache/program-v2/<owner>/<repo>/<commit>.json` and verify the associated report and matching completed Actions run before reusing it. **Fresh/rescan/from-scratch** bypasses the cache. A status check for an existing request uses the existing ID.
+- Neither route installs or launches candidate software. Approved-source library publication remains a separate user-approved action.
 
 ## Connection requirements
 
