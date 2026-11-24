@@ -43,7 +43,7 @@ def validate():
     with open(out,"a") as f:
         for key,value in {"request_id":rid,"repository":repository,"source_commit":sha}.items():f.write(key+"="+value+"\n")
     ROOT.joinpath(rid).mkdir(parents=True,exist_ok=True)
-    ROOT.joinpath(rid,"request.json").write_text(json.dumps({"request_id":rid,"repository_url":"https://github.com/"+repository,"source_commit":sha},indent=2))
+    ROOT.joinpath(rid,"request.json").write_text(json.dumps({"request_id":rid,"repository_url":"https://github.com/"+repository,"source_commit":sha,"pipeline_version":"program-v2"},indent=2))
     print("Validated program request",rid,"at",sha)
 
 def summarize():
@@ -53,7 +53,7 @@ def summarize():
     req=json.loads((folder/"request.json").read_text())
     codeql=os.environ.get("CODEQL_STATUS","unknown")
     osv=os.environ.get("OSV_STATUS","unknown")
-    report={"schema_version":1,"target_kind":"software_program","request_id":rid,**req,
+    report={"schema_version":2,"target_kind":"software_program","request_id":rid,**req,
             "scan_mode":"static_code_and_dependency","codeql":{"status":codeql,"sarif_findings":None},
             "osv":{"status":osv,"vulnerabilities":None},
             "limitations":["Not a full security guarantee","No candidate application installation, startup, tests, or build was authorized",
@@ -102,6 +102,7 @@ def summarize():
     report["state"]=state
     summary={key:report[key] for key in ["schema_version","target_kind","request_id","repository_url","source_commit","scan_mode","state","codeql","osv","review_required","publication_approved"]}
     summary["embedded_skills"]={"status":embedded.get("status"),"discovered_count":embedded.get("discovered_count"),"selected_count":embedded.get("selected_count"),"findings":sum(v.get("findings") or 0 for v in embedded.get("results",[]))}
+    summary["pipeline_version"]="program-v2"
     summary["report_path"]=f".scan-results/{rid}/report.json"
     summary["run_url"]=os.getenv("GITHUB_SERVER_URL","https://github.com")+"/"+os.getenv("GITHUB_REPOSITORY","lancea-aicareercoaching/team-skill-review")+"/actions/runs/"+os.getenv("GITHUB_RUN_ID","")
     (folder/"result.json").write_text(json.dumps(summary,indent=2)+"\n")
