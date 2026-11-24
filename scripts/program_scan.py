@@ -73,8 +73,14 @@ def summarize():
     osvfile=folder/"osv.json"
     if osv in {"success","findings"} and osvfile.is_file():
         data=json.loads(osvfile.read_text())
-        report["osv"]["vulnerabilities"]=sum(len(p.get("vulnerabilities",[])) for p in data.get("results",[]) for p in p.get("packages",[]))
-        report["osv"]["status"]=osv
+        sources=data.get("results",[])
+        if not isinstance(sources,list) or not sources:
+            report["osv"]["status"]="incomplete"
+            report["osv"]["explanation"]="No recognized dependency inventory was reported."
+        else:
+            report["osv"]["sources_checked"]=len(sources)
+            report["osv"]["vulnerabilities"]=sum(len(p.get("vulnerabilities",[])) for source in sources for p in source.get("packages",[]))
+            report["osv"]["status"]=osv
     else:
         report["osv"]["status"]="incomplete"
     if report["codeql"]["status"]=="incomplete" or report["osv"]["status"]=="incomplete":
