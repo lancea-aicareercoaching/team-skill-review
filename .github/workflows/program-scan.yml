@@ -1,0 +1,120 @@
+name: Scan software program from chat
+
+on:
+  push:
+    branches: [main]
+    paths: ['.program-requests/*.json']
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    outputs:
+      request_id: ${{ steps.request.outputs.request_id }}
+    steps:
+      - name: Read trusted program scanner
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Validate request and pin source
+        id: request
+        env:
+          SOURCE_READ_TOKEN: ${{ github.token }}
+        run: python3 scripts/program_scan.py validate
+      - name: Checkout public candidate as data, without executing it
+        id: source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: ${{ steps.request.outputs.repository }}
+          ref: ${{ steps.request.outputs.source_commit }}
+          path: candidate
+          submodules: false
+          lfs: false
+          persist-credentials: false
+          clean: true
+      - name: Initialize CodeQL static analysis
+        id: codeql_init
+        continue-on-error: true
+        uses: github/codeql-action/init@v4
+        with:
+          languages: python,javascript-typescript
+          build-mode: none
+          config: |
+            paths:
+              - candidate/**
+            queries:
+              - uses: security-extended
+      - name: Analyze source using CodeQL, without building candidate
+        id: codeql
+        if: steps.codeql_init.outcome == 'success'
+        continue-on-error: true
+        uses: github/codeql-action/analyze@v4
+        with:
+          upload: never
+          output: program-results/${{ steps.request.outputs.request_id }}/sarif
+      - name: Install official pinned dependency scanner (not candidate)
+        id: osv_install
+        continue-on-error: true
+        run: |
+          set -eu
+          go install github.com/google/osv-scanner/v2/cmd/osv-scanner@v2.7.1
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      - name: Scan candidate dependency inventories without installing them
+        id: osv
+        if: steps.osv_install.outcome == 'success'
+        continue-on-error: true
+        env:
+          REQUEST_ID: ${{ steps.request.outputs.request_id }}
+        run: |
+          set +e
+          osv-scanner scan source --format=json --output-file "program-results/$REQUEST_ID/osv.json" -r candidate
+          code=$?
+          if [ "$code" -eq 0 ]; then
+            echo "status=success" >> "$GITHUB_OUTPUT"
+          elif [ "$code" -eq 1 ] && [ -s "program-results/$REQUEST_ID/osv.json" ]; then
+            echo "status=findings" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=incomplete" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Summarize verified evidence; never auto-approve software
+        if: always() && steps.request.outcome == 'success'
+        env:
+          REQUEST_ID: ${{ steps.request.outputs.request_id }}
+          CODEQL_STATUS: ${{ steps.codeql.outcome }}
+          OSV_STATUS: ${{ steps.osv.outputs.status }}
+        run: python3 scripts/program_scan.py summarize
+      - name: Preserve program report
+        if: always() && steps.request.outcome == 'success'
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: program-scan-${{ github.run_id }}
+          path: program-results/
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: scan
+    if: always() && needs.scan.outputs.request_id != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout trusted result publisher
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - name: Download report from matching run
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: program-scan-${{ github.run_id }}
+          path: program-results
+      - name: Publish report JSON to existing shared scanner repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUEST_ID: ${{ needs.scan.outputs.request_id }}
+        run: python3 scripts/chat_scan.py publish "program-results/$REQUEST_ID"
