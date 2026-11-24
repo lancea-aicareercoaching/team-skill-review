@@ -1,4 +1,14 @@
-# Program scan from chat (preliminary)
+# Program scan from chat
+
+## Team-wide automation (program-v2)
+
+The shared workflow applies to all authorized team members, not just a single operator. One submitted public software repository link resolves to a pinned source commit. A **normal scan** checks the immutable-source reusable index first at `.scan-cache/program-v2/<owner>/<repo>/<commit>.json`. Validate the indexed result/report/decision and matching run before reusing a verdict. **Fresh**, **rescan** or **from scratch** bypasses this cache and submits a new independent request. A status check for an existing request must not create another request.
+
+The current GitHub workflow uses five stages: `prepare`, three **parallel** analyzer jobs (`codeql`, `osv`, `embedded_skills`), `aggregate` for verified evidence and automatic deterministic triage, and `publish`. The aggregator treats any missing or failed scanner evidence as incomplete. It emits exactly **Recommended to install** or **Do not install yet** as a final advisory in `result.json`, `report.json` and `decision.md`. This is not a claim of complete safety, and no candidate code is executed or installed.
+
+After report publication, the publisher attempts to register a reusable cache entry for the source and pipeline version and creates a short **GitHub issue** announcing the completed decision. GitHub issue notifications depend on watchers' and teammates' notification settings. Neither a Slack message nor a new ChatGPT message is automatically delivered. A notification failure does not invalidate a completed, published security report.
+
+This changes the workflow from sequential scanner execution to parallel jobs and does **not** require a new team repository. Only the security report is published automatically. Publishing a candidate program or skill into the approved distribution library remains an explicit separate approval.
 
 **Fixed company scanner repository:** `lancea-aicareercoaching/team-skill-review` on `main`.
 
@@ -15,7 +25,7 @@ Use `.github/workflows/program-scan.yml` for **software programs**, without repl
 8. Program scan evidence is recorded in `.scan-results/<request-id>/` automatically when the worker and publisher succeed. This **does not** copy, endorse, or approve the source repository for the company's distribution library. Only after an explicit per-repository approval and review of license and source SHA may an authorized user publish a versioned copy to the existing shared company library and verify readback.
 9. If an analyzer does not run due to private GitHub Code Security licensing restrictions or execution limits, report it as incomplete and ask for an approved alternative; don't alter paid settings or grant new permissions automatically.
 
-**Important:** The first program-scan workflow is new and must be tested. A successful GitHub Actions status alone doesn't indicate a passed security scan. Never install DeepTutor; the program test, if requested, is read-only.
+**Important:** The parallel workflow is configured but has not been verified by a new end-to-end run. A successful GitHub Actions status alone doesn't indicate a passed security scan. Never install DeepTutor; the program test, if requested, is read-only.
 
 ## Automated findings triage and binary recommendation
 
