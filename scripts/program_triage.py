@@ -32,10 +32,20 @@ def analyze(rid):
                 distinct_locations.add(fingerprint)
                 sev = str(issue.get("level") or rules.get(rule, {}).get("defaultConfiguration", {}).get("level") or "unknown")
                 severities[sev] += 1
-                if len(codeql_examples) < 15:
-                    codeql_examples.append({"rule":rule,"level":sev,"file":loc,"line":line,
-                      "message":str(issue.get("message",{}).get("text",""))[:220]})
+                metadata = rules.get(rule, {}).get("properties", {})
+                raw_score = metadata.get("security-severity")
+                try:
+                    score = float(raw_score)
+                    if not 0 <= score <= 10:
+                        score = None
+                except (TypeError, ValueError):
+                    score = None
+                codeql_examples.append({"rule":rule,"level":sev,"file":loc,"line":line,
+                    "security_severity":score,
+                    "message":str(issue.get("message",{}).get("text",""))[:500]})
+    codeql_examples.sort(key=lambda x: (x['security_severity'] is None, -(x['security_severity'] or 0), x['rule'], x['file'], x['line'] or 0))
     vulnerabilities = collections.defaultdict(set)
+    osv_evidence = []
     osv_file = folder / "osv.json"
     if osv_file.exists() and report.get("osv",{}).get("status") in ("success","findings"):
         osv = json.loads(osv_file.read_text())
@@ -45,6 +55,11 @@ def analyze(rid):
                 package_name = str(info.get("name") or info.get("package_name") or "unknown")
                 for match in package.get("vulnerabilities", []):
                     vulnerabilities[str(match.get("id","unknown"))].add(package_name)
+                    osv_evidence.append({"id":str(match.get("id","unknown")),
+                        "package":package_name,"version":info.get("version"),
+                        "ecosystem":info.get("ecosystem"),"inventory":group.get("source",{}),
+                        "aliases":match.get("aliases",[]),"severity":match.get("severity",[]),
+                        "affected":match.get("affected",[])})
     embedded = report.get("embedded_skills", {})
     embedded_hits = sum(x.get("findings") or 0 for x in embedded.get("results", []))
     complete = (report.get("codeql",{}).get("status") == "success"
@@ -59,19 +74,23 @@ def analyze(rid):
         reason = "At least one scanner or its evidence is incomplete."
     elif unresolved:
         verdict = "Do not install yet"
-        reason = "Unresolved source-code, dependency, or AI-skill findings require further verification."
+        reason = "Automated precaution: findings have not been adjudicated for actual exposure, severity, or false positives. This is not a final contextual assessment."
     else:
         verdict = "Recommended to install"
         reason = "Configured static checks completed without reported findings; runtime safety is not guaranteed."
     triage = {"codeql_unique_rule_locations":len(distinct_locations),
-       "codeql_levels":dict(severities),"codeql_examples":codeql_examples,
+       "codeql_levels":dict(severities),"codeql_examples":codeql_examples[:15],
+       "codeql_evidence":codeql_examples,
+       "osv_evidence":osv_evidence,
        "osv_distinct_vulnerability_ids":len(vulnerabilities),
        "osv_examples":[{"id":key,"packages":sorted(vals)[:4]} for key,vals in list(sorted(vulnerabilities.items()))[:15]],
        "embedded_skill_findings":embedded_hits}
-    result.update(recommendation=verdict,recommendation_reason=reason,triage={
+    result.update(recommendation=verdict,recommendation_reason=reason,
+      recommendation_kind="automated_precaution", ai_investigation_complete=False,triage={
       "codeql_unique_rule_locations":len(distinct_locations),
       "osv_distinct_vulnerability_ids":len(vulnerabilities),"embedded_skill_findings":embedded_hits})
     report.update(recommendation=verdict,recommendation_reason=reason,triage=triage,
+      recommendation_kind="automated_precaution", ai_investigation_complete=False,
       recommendation_scope="Advisory assessment of configured static checks only; never automatic installation or publication.")
     report_file.write_text(json.dumps(report,indent=2)+"\n")
     summary_file.write_text(json.dumps(result,indent=2)+"\n")
