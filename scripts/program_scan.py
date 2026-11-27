@@ -15,10 +15,21 @@ def request_file():
         raise ValueError("Invalid request ID")
     return matched[0],path.stem
 
-def validate():
+def load_request():
+    """Support either the original push-file trigger or validated workflow dispatch."""
+    if os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch":
+        rid=os.environ.get("SCAN_REQUEST_ID","")
+        if not ID.fullmatch(rid): raise ValueError("Invalid dispatched request ID")
+        request={"repository_url":os.environ.get("SCAN_REPOSITORY_URL",""),
+                 "ref":os.environ.get("SCAN_REF","HEAD") or "HEAD"}
+        if len(json.dumps(request).encode())>4096: raise ValueError("Request too large")
+        return rid,request
     path,rid=request_file()
     if pathlib.Path(path).stat().st_size>4096: raise ValueError("Request too large")
-    request=json.loads(pathlib.Path(path).read_text())
+    return rid,json.loads(pathlib.Path(path).read_text())
+
+def validate():
+    rid,request=load_request()
     if not isinstance(request,dict) or set(request)-{"repository_url","ref"}: raise ValueError("Only repository_url and ref allowed")
     url=urllib.parse.urlsplit(request.get("repository_url",""))
     parts=url.path.strip("/").split("/")
