@@ -1,0 +1,36 @@
+{
+  "schema_version": 2,
+  "target_kind": "software_program",
+  "request_id": "scan-20261127-deeptutor-c929888e-2104",
+  "repository_url": "https://github.com/HKUDS/DeepTutor",
+  "source_commit": "c929888e783bcf55d73444eb838a7e1e032db0b0",
+  "scan_mode": "static_code_and_dependency",
+  "state": "needs_review",
+  "codeql": {
+    "status": "success",
+    "sarif_findings": 499
+  },
+  "osv": {
+    "status": "findings",
+    "vulnerabilities": 519,
+    "sources_checked": 5
+  },
+  "review_required": true,
+  "publication_approved": false,
+  "embedded_skills": {
+    "status": "complete",
+    "discovered_count": 6,
+    "selected_count": 6,
+    "findings": 2
+  },
+  "pipeline_version": "program-v2",
+  "report_path": ".scan-results/scan-20261127-deeptutor-c929888e-2104/report.json",
+  "run_url": "https://github.com/lancea-aicareercoaching/team-skill-review/actions/runs/46006098988",
+  "recommendation": "Do not install yet",
+  "recommendation_reason": "Unresolved source-code, dependency, or AI-skill findings require further verification.",
+  "triage": {
+    "codeql_unique_rule_locations": 474,
+    "osv_distinct_vulnerability_ids": 386,
+    "embedded_skill_findings": 2
+  }
+}
