@@ -4,6 +4,21 @@ on:
   push:
     branches: [main]
     paths: ['.program-requests/*.json']
+  workflow_dispatch:
+    inputs:
+      request_id:
+        description: Unique lowercase scan request ID
+        required: true
+        type: string
+      repository_url:
+        description: Public GitHub repository root URL
+        required: true
+        type: string
+      ref:
+        description: Branch, tag or commit to scan (HEAD means default)
+        required: false
+        default: HEAD
+        type: string
 
 permissions:
   contents: read
@@ -26,6 +41,9 @@ jobs:
         id: request
         env:
           SOURCE_READ_TOKEN: ${{ github.token }}
+          SCAN_REQUEST_ID: ${{ inputs.request_id }}
+          SCAN_REPOSITORY_URL: ${{ inputs.repository_url }}
+          SCAN_REF: ${{ inputs.ref }}
         run: python3 scripts/program_scan.py validate
       - name: Transfer verified request to independent scan jobs
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
