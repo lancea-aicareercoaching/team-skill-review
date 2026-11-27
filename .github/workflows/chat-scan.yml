@@ -4,6 +4,25 @@ on:
   push:
     branches: [main]
     paths: ['.scan-requests/*.json']
+  workflow_dispatch:
+    inputs:
+      request_id:
+        description: Unique lowercase scan request ID
+        required: true
+        type: string
+      repository_url:
+        description: Public GitHub repository root URL
+        required: true
+        type: string
+      ref:
+        description: Branch, tag or commit to scan
+        required: false
+        default: HEAD
+        type: string
+      skill_path:
+        description: Optional folder containing SKILL.md
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -22,6 +41,11 @@ jobs:
           persist-credentials: false
       - name: Identify the new request
         id: request
+        env:
+          SCAN_REQUEST_ID: ${{ inputs.request_id }}
+          SCAN_REPOSITORY_URL: ${{ inputs.repository_url }}
+          SCAN_REF: ${{ inputs.ref }}
+          SCAN_SKILL_PATH: ${{ inputs.skill_path }}
         run: python3 scripts/chat_scan.py select
       - name: Install pinned SkillSpector
         run: |
