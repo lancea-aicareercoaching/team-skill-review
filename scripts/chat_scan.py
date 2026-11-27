@@ -260,15 +260,29 @@ def run_request(request_path, output_root=Path("chat-results"), api=github_api, 
     return result
 
 def select_changed_request():
-    sha = os.environ["GITHUB_SHA"]
-    raw = subprocess.check_output(["git", "diff-tree", "--no-commit-id", "--name-only", "--diff-filter=A", "-r", sha], text=True)
-    paths = [p for p in raw.splitlines() if p.startswith(".scan-requests/") and p.endswith(".json")]
-    if len(paths) != 1:
-        raise ValueError("Create exactly one new request file per commit; use a new id for each scan")
-    rid = request_id(paths[0])
+    if os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch":
+        rid = os.environ.get("SCAN_REQUEST_ID", "")
+        if not ID_RE.fullmatch(rid):
+            raise ValueError("Invalid workflow dispatch request ID")
+        request = validate_request({
+            "repository_url": os.environ.get("SCAN_REPOSITORY_URL", ""),
+            "ref": os.environ.get("SCAN_REF", "HEAD") or "HEAD",
+            **({"skill_path": os.environ["SCAN_SKILL_PATH"]} if os.environ.get("SCAN_SKILL_PATH") else {}),
+        })
+        path = f".scan-requests/{rid}.json"
+        Path(".scan-requests").mkdir(exist_ok=True)
+        Path(path).write_text(json.dumps({key: request[key] for key in ("repository_url", "ref", "skill_path") if request[key] is not None}), encoding="utf-8")
+    else:
+        sha = os.environ["GITHUB_SHA"]
+        raw = subprocess.check_output(["git", "diff-tree", "--no-commit-id", "--name-only", "--diff-filter=A", "-r", sha], text=True)
+        paths = [p for p in raw.splitlines() if p.startswith(".scan-requests/") and p.endswith(".json")]
+        if len(paths) != 1:
+            raise ValueError("Create exactly one new request file per commit; use a new id for each scan")
+        path = paths[0]
+        rid = request_id(path)
     with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
-        f.write(f"request_path={paths[0]}\nrequest_id={rid}\n")
-    return paths[0]
+        f.write(f"request_path={path}\nrequest_id={rid}\n")
+    return path
 
 def publish(folder, api=github_api):
     # Fresh runner: do not load candidate code. Write only this request's two JSON files.
