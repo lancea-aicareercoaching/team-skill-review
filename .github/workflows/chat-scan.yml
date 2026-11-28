@@ -30,7 +30,7 @@ permissions:
 jobs:
   scan:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     outputs:
       request_id: ${{ steps.request.outputs.request_id }}
     steps:
@@ -47,7 +47,12 @@ jobs:
           SCAN_REF: ${{ inputs.ref }}
           SCAN_SKILL_PATH: ${{ inputs.skill_path }}
         run: python3 scripts/chat_scan.py select
+      - name: Prepare pinned ClamAV and refresh official signatures
+        env:
+          CLAMAV_STATE_DIR: ${{ runner.temp }}/skill-clamav
+        run: python3 scripts/malware_scan.py prepare "$CLAMAV_STATE_DIR"
       - name: Install pinned SkillSpector
+        continue-on-error: true
         run: |
           python3 -m venv "$RUNNER_TEMP/scanner"
           "$RUNNER_TEMP/scanner/bin/pip" install "git+https://github.com/NVIDIA/skillspector.git@a09091e0ebf6c96ff327457529d7b0d372125884"
@@ -57,6 +62,7 @@ jobs:
         env:
           REQUEST_PATH: ${{ steps.request.outputs.request_path }}
           SOURCE_READ_TOKEN: ${{ github.token }}
+          CLAMAV_STATE_DIR: ${{ runner.temp }}/skill-clamav
         run: python3 scripts/chat_scan.py scan "$REQUEST_PATH"
       - name: Preserve request result
         if: always() && steps.request.outcome == 'success'

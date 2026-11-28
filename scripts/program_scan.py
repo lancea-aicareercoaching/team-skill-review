@@ -3,6 +3,8 @@ Never imports, installs, builds, or launches candidate code.
 """
 import json, os, pathlib, re, subprocess, sys, urllib.parse, urllib.request
 
+from malware_scan import PROGRAM_PIPELINE, read_evidence
+
 ROOT=pathlib.Path("program-results")
 ID=re.compile(r"[a-z0-9][a-z0-9-]{7,63}$")
 PART=re.compile(r"[A-Za-z0-9_.-]{1,100}$")
@@ -54,7 +56,7 @@ def validate():
     with open(out,"a") as f:
         for key,value in {"request_id":rid,"repository":repository,"source_commit":sha}.items():f.write(key+"="+value+"\n")
     ROOT.joinpath(rid).mkdir(parents=True,exist_ok=True)
-    ROOT.joinpath(rid,"request.json").write_text(json.dumps({"request_id":rid,"repository_url":"https://github.com/"+repository,"source_commit":sha,"pipeline_version":"program-v2"},indent=2))
+    ROOT.joinpath(rid,"request.json").write_text(json.dumps({"request_id":rid,"repository_url":"https://github.com/"+repository,"source_commit":sha,"pipeline_version":PROGRAM_PIPELINE},indent=2))
     print("Validated program request",rid,"at",sha)
 
 def summarize():
@@ -65,7 +67,7 @@ def summarize():
     codeql=os.environ.get("CODEQL_STATUS","unknown")
     osv=os.environ.get("OSV_STATUS","unknown")
     report={"schema_version":2,"target_kind":"software_program","request_id":rid,**req,
-            "scan_mode":"static_code_and_dependency","codeql":{"status":codeql,"sarif_findings":None},
+            "scan_mode":"static_code_dependency_and_malware","codeql":{"status":codeql,"sarif_findings":None},
             "osv":{"status":osv,"vulnerabilities":None},
             "limitations":["Not a full security guarantee","No candidate application installation, startup, tests, or build was authorized",
                            "Only supported CodeQL languages and OSV-recognized package inventories are covered",
@@ -114,17 +116,19 @@ def summarize():
     else:
         embedded={"status":"incomplete","results":[],"error":"Embedded skill scan did not complete"}
     report["embedded_skills"]=embedded
+    malware = read_evidence(folder / "malware.json")
+    report["malware"] = malware
     has_skill_findings=any((item.get("findings") or 0)>0 or (item.get("risk_severity") or "").upper() in {"MEDIUM","HIGH","CRITICAL"} for item in embedded.get("results",[]))
-    if report["codeql"]["status"]=="incomplete" or report["osv"]["status"]=="incomplete" or embedded["status"] in {"partial","incomplete"}:
+    if report["codeql"]["status"]=="incomplete" or report["osv"]["status"]=="incomplete" or embedded["status"] in {"partial","incomplete"} or malware.get("coverage_complete") is not True:
         state="incomplete"
-    elif report["codeql"]["sarif_findings"] or report["osv"]["vulnerabilities"] or has_skill_findings:
+    elif report["codeql"]["sarif_findings"] or report["osv"]["vulnerabilities"] or has_skill_findings or malware["status"] != "clean":
         state="needs_review"
     else:
         state="review_required"
     report["state"]=state
-    summary={key:report[key] for key in ["schema_version","target_kind","request_id","repository_url","source_commit","scan_mode","state","codeql","osv","review_required","publication_approved"]}
+    summary={key:report[key] for key in ["schema_version","target_kind","request_id","repository_url","source_commit","scan_mode","state","codeql","osv","malware","review_required","publication_approved"]}
     summary["embedded_skills"]={"status":embedded.get("status"),"discovered_count":embedded.get("discovered_count"),"selected_count":embedded.get("selected_count"),"findings":sum(v.get("findings") or 0 for v in embedded.get("results",[]))}
-    summary["pipeline_version"]="program-v2"
+    summary["pipeline_version"]=PROGRAM_PIPELINE
     summary["report_path"]=f".scan-results/{rid}/report.json"
     summary["run_url"]=os.getenv("GITHUB_SERVER_URL","https://github.com")+"/"+os.getenv("GITHUB_REPOSITORY","lancea-aicareercoaching/team-skill-review")+"/actions/runs/"+os.getenv("GITHUB_RUN_ID","")
     (folder/"result.json").write_text(json.dumps(summary,indent=2)+"\n")
