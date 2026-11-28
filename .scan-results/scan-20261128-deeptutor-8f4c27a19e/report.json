@@ -1,0 +1,341 @@
+{
+  "schema_version": 2,
+  "target_kind": "software_program",
+  "request_id": "scan-20261128-deeptutor-8f4c27a19e",
+  "repository_url": "https://github.com/HKUDS/DeepTutor",
+  "source_commit": "c929888e783bcf55d73444eb838a7e1e032db0b0",
+  "pipeline_version": "program-v3",
+  "scan_mode": "static_code_dependency_and_malware",
+  "codeql": {
+    "status": "success",
+    "sarif_findings": 499
+  },
+  "osv": {
+    "status": "findings",
+    "vulnerabilities": 519,
+    "sources_checked": 5
+  },
+  "limitations": [
+    "Not a full security guarantee",
+    "No candidate application installation, startup, tests, or build was authorized",
+    "Only supported CodeQL languages and OSV-recognized package inventories are covered",
+    "External runtime services, secrets handling, and dynamic behavior are not verified"
+  ],
+  "review_required": true,
+  "publication_approved": false,
+  "embedded_skills": {
+    "status": "complete",
+    "discovered_count": 6,
+    "scan_limit": 12,
+    "selected_count": 6,
+    "scope": "SKILL.md instruction file only; adjacent scripts/dependencies not covered",
+    "results": [
+      {
+        "path": "SKILL.md",
+        "status": "complete",
+        "findings": 1,
+        "sha256": "1eca34a7674b2b4cdc8039575281d5b85d457c3f1d8257bc4b42825d116336ec",
+        "risk_score": 8,
+        "risk_severity": "LOW",
+        "issues": [
+          {
+            "id": "EA2",
+            "severity": "MEDIUM",
+            "description": ""
+          }
+        ]
+      },
+      {
+        "path": "deeptutor/skills/builtin/docx/SKILL.md",
+        "status": "complete",
+        "findings": 0,
+        "sha256": "66afa8c19a53db613ecdd7e45709210db66b8937638325b15c054e8df719f5f6",
+        "risk_score": 0,
+        "risk_severity": "LOW",
+        "issues": []
+      },
+      {
+        "path": "deeptutor/skills/builtin/pdf/SKILL.md",
+        "status": "complete",
+        "findings": 1,
+        "sha256": "c950efb9d180879b978f765cfc0e6f217669231a62e618054ebff6df1002a8e3",
+        "risk_score": 7,
+        "risk_severity": "LOW",
+        "issues": [
+          {
+            "id": "EA2",
+            "severity": "MEDIUM",
+            "description": ""
+          }
+        ]
+      },
+      {
+        "path": "deeptutor/skills/builtin/pptx/SKILL.md",
+        "status": "complete",
+        "findings": 0,
+        "sha256": "72e6ecbc8b3194bfbd2d4230abbbd0df2e1f1bfaa5348f0b05b778475edfd009",
+        "risk_score": 0,
+        "risk_severity": "LOW",
+        "issues": []
+      },
+      {
+        "path": "deeptutor/skills/builtin/skill-creator/SKILL.md",
+        "status": "complete",
+        "findings": 0,
+        "sha256": "158a8544c752c7aca824d74d51bd3d59b70e36369218d22b52424d4054109b18",
+        "risk_score": 0,
+        "risk_severity": "LOW",
+        "issues": []
+      },
+      {
+        "path": "deeptutor/skills/builtin/xlsx/SKILL.md",
+        "status": "complete",
+        "findings": 0,
+        "sha256": "9f5e476f8692ff737bf3251d00e71e52e9b6a9f3837b78914f428022fba89868",
+        "risk_score": 0,
+        "risk_severity": "LOW",
+        "issues": []
+      }
+    ]
+  },
+  "malware": {
+    "policy_version": "clamav-v1",
+    "image": "docker.io/clamav/clamav@sha256:64e30c0bf976198024deb3dc6d5cfe2485fb969c0f73549ba0fdb364b9469614",
+    "status": "stale_signatures",
+    "reason": "The official daily database is outside the 72-hour freshness window.",
+    "signatures": {
+      "databases": {
+        "main": {
+          "version": 63,
+          "built_at": "2025-12-16T23:18:22+00:00",
+          "sha256": "0b2182d229f46981ec8f535382222f7c9dfdd656b250ad47988b910a8d302365"
+        },
+        "daily": {
+          "version": 28194,
+          "built_at": "2026-11-25T06:26:59+00:00",
+          "sha256": "a1854c4aaa0991d68b984e6b26c73a849cd6d24859b0a0d3e099bca00e66ebc2"
+        },
+        "bytecode": {
+          "version": 339,
+          "built_at": "2025-09-11T12:29:19+00:00",
+          "sha256": "6d4aa01f219e988060fc419f495d07f27e0cdf1a2cccc065971da922c76f7ffb"
+        }
+      },
+      "valid_until": "2026-11-28T06:26:59+00:00"
+    },
+    "update_exit_code": 0
+  },
+  "state": "incomplete",
+  "run_url": "https://github.com/lancea-aicareercoaching/team-skill-review/actions/runs/46119742261",
+  "advisory": "Scan coverage incomplete",
+  "advisory_reason": "One or more configured checks had missing, failed, stale, or limited evidence.",
+  "deployment_eligibility": "blocked",
+  "triage": {
+    "codeql_unique_rule_locations": 474,
+    "codeql_levels": {
+      "unknown": 474
+    },
+    "codeql_examples": [
+      {
+        "rule": "js/redos",
+        "level": "unknown",
+        "file": "candidate/web/lib/latex-normalize.ts",
+        "line": 29,
+        "message": "This part of the regular expression may cause exponential backtracking on strings containing many repetitions of '\\\\#'."
+      },
+      {
+        "rule": "js/redos",
+        "level": "unknown",
+        "file": "candidate/web/lib/markdown-display.ts",
+        "line": 147,
+        "message": "This part of the regular expression may cause exponential backtracking on strings containing many repetitions of '\\\\#'."
+      },
+      {
+        "rule": "js/incomplete-sanitization",
+        "level": "unknown",
+        "file": "candidate/web/lib/latex.ts",
+        "line": 251,
+        "message": "This does not escape backslash characters in the input."
+      },
+      {
+        "rule": "js/incomplete-multi-character-sanitization",
+        "level": "unknown",
+        "file": "candidate/web/lib/markdown-display.ts",
+        "line": 281,
+        "message": "This string may still contain [<script](1), which may cause an HTML element injection vulnerability."
+      },
+      {
+        "rule": "js/incomplete-multi-character-sanitization",
+        "level": "unknown",
+        "file": "candidate/web/lib/markdown-display.ts",
+        "line": 1008,
+        "message": "This string may still contain [<script](1), which may cause an HTML element injection vulnerability."
+      },
+      {
+        "rule": "js/incomplete-multi-character-sanitization",
+        "level": "unknown",
+        "file": "candidate/web/tests/reading-inline-markdown.test.ts",
+        "line": 16,
+        "message": "This string may still contain [<script](1), which may cause an HTML element injection vulnerability."
+      },
+      {
+        "rule": "js/double-escaping",
+        "level": "unknown",
+        "file": "candidate/web/tests/reading-inline-markdown.test.ts",
+        "line": 16,
+        "message": "This replacement may produce '&' characters that are double-unescaped [here](1)."
+      },
+      {
+        "rule": "js/insufficient-password-hash",
+        "level": "unknown",
+        "file": "candidate/packages/chat-engine/src/providers/limits.ts",
+        "line": 45,
+        "message": "Password from [an access to apiKey](1) is hashed insecurely."
+      },
+      {
+        "rule": "js/xss-through-dom",
+        "level": "unknown",
+        "file": "candidate/web/components/settings/ServicePreviewPanel.tsx",
+        "line": 227,
+        "message": "[DOM text](1) is reinterpreted as HTML without escaping meta-characters."
+      },
+      {
+        "rule": "js/xss-through-dom",
+        "level": "unknown",
+        "file": "candidate/web/features/notes/components/AddToNote.tsx",
+        "line": 118,
+        "message": "[DOM text](1) is reinterpreted as HTML without escaping meta-characters."
+      },
+      {
+        "rule": "js/insecure-randomness",
+        "level": "unknown",
+        "file": "candidate/web/app/(workspace)/partners/groups/%5BgroupId%5D/page.tsx",
+        "line": 51,
+        "message": "This uses a cryptographically insecure random number generated at [Math.random()](1) in a security context.\nThis uses a cryptographically insecure random number generated at [Math.random()](2) in a security context."
+      },
+      {
+        "rule": "js/insecure-randomness",
+        "level": "unknown",
+        "file": "candidate/web/app/(workspace)/partners/%5BpartnerId%5D/page.tsx",
+        "line": 103,
+        "message": "This uses a cryptographically insecure random number generated at [Math.random()](1) in a security context."
+      },
+      {
+        "rule": "js/insecure-randomness",
+        "level": "unknown",
+        "file": "candidate/web/app/(workspace)/partners/%5BpartnerId%5D/page.tsx",
+        "line": 104,
+        "message": "This uses a cryptographically insecure random number generated at [Math.random()](1) in a security context."
+      },
+      {
+        "rule": "js/incomplete-url-scheme-check",
+        "level": "unknown",
+        "file": "candidate/web/components/visualize/VisualizationViewer.tsx",
+        "line": 327,
+        "message": "This check does not consider vbscript:."
+      },
+      {
+        "rule": "js/file-system-race",
+        "level": "unknown",
+        "file": "candidate/apps/desktop/scripts/seal-runtime.mjs",
+        "line": 27,
+        "message": "The file may have changed since it [was checked](1)."
+      }
+    ],
+    "osv_distinct_vulnerability_ids": 386,
+    "osv_examples": [
+      {
+        "id": "GHSA-22hg-r758-rrw9",
+        "packages": [
+          "pillow"
+        ]
+      },
+      {
+        "id": "GHSA-238p-pmpm-9mq7",
+        "packages": [
+          "katex"
+        ]
+      },
+      {
+        "id": "GHSA-24c4-3p7v-29cm",
+        "packages": [
+          "aiohttp"
+        ]
+      },
+      {
+        "id": "GHSA-24rc-8hj2-v98c",
+        "packages": [
+          "pillow"
+        ]
+      },
+      {
+        "id": "GHSA-254f-3936-288h",
+        "packages": [
+          "pillow"
+        ]
+      },
+      {
+        "id": "GHSA-27h8-gf7j-v5hc",
+        "packages": [
+          "pillow"
+        ]
+      },
+      {
+        "id": "GHSA-2883-xcg3-v3hh",
+        "packages": [
+          "js-yaml"
+        ]
+      },
+      {
+        "id": "GHSA-28qf-cpwq-vmc2",
+        "packages": [
+          "aiohttp"
+        ]
+      },
+      {
+        "id": "GHSA-2fqr-mr3j-6wp8",
+        "packages": [
+          "aiohttp"
+        ]
+      },
+      {
+        "id": "GHSA-2g87-pp6c-29x5",
+        "packages": [
+          "aiohttp"
+        ]
+      },
+      {
+        "id": "GHSA-2gqq-gqf2-x968",
+        "packages": [
+          "undici"
+        ]
+      },
+      {
+        "id": "GHSA-2jfj-6hjv-fm6j",
+        "packages": [
+          "undici"
+        ]
+      },
+      {
+        "id": "GHSA-2jhm-w3mp-jcwr",
+        "packages": [
+          "nltk"
+        ]
+      },
+      {
+        "id": "GHSA-2m5v-pch6-74hx",
+        "packages": [
+          "undici"
+        ]
+      },
+      {
+        "id": "GHSA-2v8p-3f2j-5mp7",
+        "packages": [
+          "mermaid"
+        ]
+      }
+    ],
+    "embedded_skill_findings": 2
+  },
+  "advisory_scope": "Advisory assessment of configured static checks only; never automatic installation or publication."
+}
