@@ -260,7 +260,7 @@ def run_request(request_path, output_root=Path("chat-results"), api=github_api, 
                 skill_state = classify(report, proc.returncode)
                 result["skillspector_state"] = skill_state
                 malware_status = result["malware"]["status"]
-                if skill_state == "scan_error":
+                if skill_state in {"scan_error", "incomplete"}:
                     result["state"] = skill_state
                 elif malware_status not in {"clean", "signature_found"} or not result["malware"].get("coverage_complete"):
                     result["state"] = "incomplete"

@@ -131,6 +131,7 @@ def summarize():
     summary["pipeline_version"]=PROGRAM_PIPELINE
     summary["report_path"]=f".scan-results/{rid}/report.json"
     summary["run_url"]=os.getenv("GITHUB_SERVER_URL","https://github.com")+"/"+os.getenv("GITHUB_REPOSITORY","lancea-aicareercoaching/team-skill-review")+"/actions/runs/"+os.getenv("GITHUB_RUN_ID","")
+    report["run_url"] = summary["run_url"]
     (folder/"result.json").write_text(json.dumps(summary,indent=2)+"\n")
     (folder/"report.json").write_text(json.dumps(report,indent=2)+"\n")
     print("Report state:",state)

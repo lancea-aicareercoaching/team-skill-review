@@ -232,6 +232,7 @@ jobs:
         env:
           REQUEST_ID: ${{ needs.prepare.outputs.request_id }}
           CLAMAV_STATE_DIR: ${{ runner.temp }}/program-clamav
+          SOURCE_COMMIT: ${{ needs.prepare.outputs.source_commit }}
         run: python3 scripts/malware_scan.py program "$CLAMAV_STATE_DIR" candidate "program-results/$REQUEST_ID/malware.json"
       - name: Preserve malware evidence
         if: always()
