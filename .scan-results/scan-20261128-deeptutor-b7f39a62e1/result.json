@@ -1,0 +1,78 @@
+{
+  "schema_version": 2,
+  "target_kind": "software_program",
+  "request_id": "scan-20261128-deeptutor-b7f39a62e1",
+  "repository_url": "https://github.com/HKUDS/DeepTutor",
+  "source_commit": "c929888e783bcf55d73444eb838a7e1e032db0b0",
+  "scan_mode": "static_code_dependency_and_malware",
+  "state": "incomplete",
+  "codeql": {
+    "status": "success",
+    "sarif_findings": 499
+  },
+  "osv": {
+    "status": "findings",
+    "vulnerabilities": 519,
+    "sources_checked": 5
+  },
+  "malware": {
+    "policy_version": "clamav-v1",
+    "image": "docker.io/clamav/clamav@sha256:64e30c0bf976198024deb3dc6d5cfe2485fb969c0f73549ba0fdb364b9469614",
+    "status": "stale_signatures",
+    "reason": "Official daily signatures remain outside the 72-hour freshness window after the permitted refresh attempts.",
+    "signatures": {
+      "databases": {
+        "main": {
+          "version": 63,
+          "built_at": "2025-12-16T23:18:22+00:00",
+          "sha256": "0b2182d229f46981ec8f535382222f7c9dfdd656b250ad47988b910a8d302365"
+        },
+        "daily": {
+          "version": 28194,
+          "built_at": "2026-11-25T06:26:59+00:00",
+          "sha256": "7122122fb8e8be5130069c461fa375dd30c57937cc4075666d0b03a6c42e3167"
+        },
+        "bytecode": {
+          "version": 339,
+          "built_at": "2025-09-11T12:29:19+00:00",
+          "sha256": "6d4aa01f219e988060fc419f495d07f27e0cdf1a2cccc065971da922c76f7ffb"
+        }
+      },
+      "valid_until": "2026-11-28T06:26:59+00:00"
+    },
+    "update_exit_code": 0,
+    "update_attempts": [
+      {
+        "mode": "seeded",
+        "exit_code": 0,
+        "daily_version": 28194,
+        "valid_until": "2026-11-28T06:26:59+00:00"
+      },
+      {
+        "mode": "full",
+        "exit_code": 0,
+        "daily_version": 28194,
+        "valid_until": "2026-11-28T06:26:59+00:00"
+      }
+    ]
+  },
+  "review_required": true,
+  "publication_approved": false,
+  "embedded_skills": {
+    "status": "complete",
+    "discovered_count": 6,
+    "selected_count": 6,
+    "findings": 2
+  },
+  "pipeline_version": "program-v3",
+  "report_path": ".scan-results/scan-20261128-deeptutor-b7f39a62e1/report.json",
+  "run_url": "https://github.com/lancea-aicareercoaching/team-skill-review/actions/runs/46144572962",
+  "advisory": "Scan coverage incomplete",
+  "advisory_reason": "One or more configured checks had missing, failed, stale, or limited evidence.",
+  "deployment_eligibility": "blocked",
+  "triage": {
+    "codeql_unique_rule_locations": 474,
+    "osv_distinct_vulnerability_ids": 386,
+    "embedded_skill_findings": 2
+  }
+}
