@@ -7,11 +7,13 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / 'scripts'))
 spec = importlib.util.spec_from_file_location('chat_scan', ROOT / 'scripts/chat_scan.py')
 worker = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(worker)
@@ -134,7 +136,10 @@ class ChatScanTests(unittest.TestCase):
                 Path('.scan-requests').mkdir()
                 Path('.scan-requests/test-12345.json').write_text(json.dumps(GOOD))
                 result = worker.run_request('.scan-requests/test-12345.json', api=api)
-                self.assertEqual(result['state'], 'no_findings')
+                self.assertEqual(result['skillspector_state'], 'no_findings')
+                self.assertEqual(result['state'], 'incomplete')
+                self.assertEqual(result['malware']['status'], 'missing')
+                self.assertEqual(result['deployment_eligibility'], 'blocked')
                 self.assertEqual(result['source_commit'], 'a'*40)
             finally:
                 os.chdir(old)
