@@ -13,7 +13,8 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-from malware_scan import PROGRAM_PIPELINE, SKILL_PIPELINE, folder_files, outcome, reusable, scan
+PROGRAM_PIPELINE = "program-v4"
+SKILL_PIPELINE = "skill-v3"
 
 MAX_REQUEST = 4096
 MAX_RESPONSE = 4 * 1024 * 1024
@@ -236,16 +237,7 @@ def run_request(request_path, output_root=Path("chat-results"), api=github_api, 
             result["skill_path"] = selected
             with tempfile.TemporaryDirectory(prefix="skill-review-") as temp:
                 folder = Path(temp) / "candidate"
-                try:
-                    result["files"] = materialize(request["repository"], entries, selected, folder, source_api)
-                except ValueError as exc:
-                    if any(word in str(exc) for word in ("limit", "symlink", "submodule")):
-                        result["malware"] = outcome("limited", str(exc), coverage_complete=False)
-                    else:
-                        result["malware"] = outcome("error", "Candidate files could not be verified.")
-                    raise
-                state_dir = Path(os.getenv("CLAMAV_STATE_DIR", ".clamav-unavailable"))
-                result["malware"] = scan(folder_files(folder), state_dir)
+                result["files"] = materialize(request["repository"], entries, selected, folder, source_api)
                 report_path = (out / "report.json").resolve()
                 scanner_env = {k: v for k, v in os.environ.items() if k not in
                                {"SOURCE_READ_TOKEN", "GH_TOKEN", "GITHUB_TOKEN"}}
@@ -259,19 +251,11 @@ def run_request(request_path, output_root=Path("chat-results"), api=github_api, 
                 # Keep a bounded JSON evidence file that the chat connector can fetch directly.
                 skill_state = classify(report, proc.returncode)
                 result["skillspector_state"] = skill_state
-                malware_status = result["malware"]["status"]
-                if skill_state in {"scan_error", "incomplete"}:
-                    result["state"] = skill_state
-                elif malware_status not in {"clean", "signature_found"} or not result["malware"].get("coverage_complete"):
-                    result["state"] = "incomplete"
-                elif malware_status == "signature_found":
-                    result["state"] = "needs_review"
-                else:
-                    result["state"] = skill_state
-                eligible = result["state"] == "no_findings" and reusable(result["malware"])
+                result["state"] = skill_state
+                eligible = skill_state == "no_findings"
                 result["deployment_eligibility"] = "eligible_for_approval" if eligible else "blocked"
                 report.update(pipeline_version=SKILL_PIPELINE, skillspector_state=skill_state,
-                              malware=result["malware"], deployment_eligibility=result["deployment_eligibility"])
+                              antivirus_included=False, deployment_eligibility=result["deployment_eligibility"])
                 report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
                 result["risk_assessment"] = report.get("risk_assessment")
                 result["inspection"] = {k: report.get("analysis_completeness", {}).get(k) for k in
@@ -283,7 +267,7 @@ def run_request(request_path, output_root=Path("chat-results"), api=github_api, 
         result["state"] = "scan_error"
         result["error"] = str(exc)[:1200]
     if result.get("target_kind") == "ai_skill" and result.get("skill_path") is not None:
-        result.setdefault("malware", outcome("missing", "Candidate acquisition did not reach ClamAV."))
+        result["antivirus_included"] = False
         result.setdefault("deployment_eligibility", "blocked")
     (out / "result.json").write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return result
@@ -356,7 +340,7 @@ def publish_program_cache(status, api=github_api):
     """
     if status.get("target_kind") != "software_program" or status.get("pipeline_version") != PROGRAM_PIPELINE:
         return
-    if status.get("state") == "incomplete" or not reusable(status.get("malware")):
+    if status.get("state") not in {"needs_review", "review_required"}:
         return
     source = status.get("repository_url", "")
     parsed = urllib.parse.urlsplit(source)
@@ -368,7 +352,7 @@ def publish_program_cache(status, api=github_api):
         raise ValueError("Cannot cache an unverified program source")
     key = f".scan-cache/{PROGRAM_PIPELINE}/{parts[0]}/{parts[1]}/{commit}.json"
     entry = {"repository_url": source, "source_commit": commit, "pipeline_version": PROGRAM_PIPELINE,
-             "request_id": status["request_id"], "malware": status["malware"],
+             "request_id": status["request_id"], "antivirus_included": False,
              "result_path": f".scan-results/{status['request_id']}/result.json",
              "report_path": f".scan-results/{status['request_id']}/report.json"}
     destination = os.environ["GITHUB_REPOSITORY"]
@@ -376,17 +360,13 @@ def publish_program_cache(status, api=github_api):
     payload = {"message": f"Index reusable program scan {status['request_id']}",
                "branch": "main", "content": base64.b64encode(
                    (json.dumps(entry, indent=2) + "\n").encode()).decode()}
-    refresh_cache(endpoint, payload, status["malware"], api)
+    refresh_cache(endpoint, payload, api=api)
     print(f"Saved reusable scan index: {key}")
 
-def refresh_cache(endpoint, payload, current, api=github_api):
+def refresh_cache(endpoint, payload, api=github_api):
     token = os.environ["GH_TOKEN"]
     try:
         existing = api(endpoint, token=token)
-        prior = json.loads(base64.b64decode(existing["content"]))
-        prior_malware = prior.get("malware")
-        if reusable(prior_malware) and prior_malware["signatures"]["valid_until"] >= current["signatures"]["valid_until"]:
-            return
         payload["sha"] = existing["sha"]
     except ValueError as exc:
         if "HTTP 404" not in str(exc):

@@ -137,8 +137,8 @@ class ChatScanTests(unittest.TestCase):
                 Path('.scan-requests/test-12345.json').write_text(json.dumps(GOOD))
                 result = worker.run_request('.scan-requests/test-12345.json', api=api)
                 self.assertEqual(result['skillspector_state'], 'no_findings')
-                self.assertEqual(result['state'], 'incomplete')
-                self.assertEqual(result['malware']['status'], 'missing')
+                self.assertEqual(result['state'], 'no_findings')
+                self.assertFalse(result['antivirus_included'])
                 self.assertEqual(result['deployment_eligibility'], 'blocked')
                 self.assertEqual(result['source_commit'], 'a'*40)
             finally:

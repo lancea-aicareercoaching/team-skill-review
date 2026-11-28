@@ -47,10 +47,6 @@ jobs:
           SCAN_REF: ${{ inputs.ref }}
           SCAN_SKILL_PATH: ${{ inputs.skill_path }}
         run: python3 scripts/chat_scan.py select
-      - name: Prepare pinned ClamAV and refresh official signatures
-        env:
-          CLAMAV_STATE_DIR: ${{ runner.temp }}/skill-clamav
-        run: python3 scripts/malware_scan.py prepare "$CLAMAV_STATE_DIR"
       - name: Install pinned SkillSpector
         continue-on-error: true
         run: |
@@ -62,7 +58,6 @@ jobs:
         env:
           REQUEST_PATH: ${{ steps.request.outputs.request_path }}
           SOURCE_READ_TOKEN: ${{ github.token }}
-          CLAMAV_STATE_DIR: ${{ runner.temp }}/skill-clamav
         run: python3 scripts/chat_scan.py scan "$REQUEST_PATH"
       - name: Preserve request result
         if: always() && steps.request.outcome == 'success'

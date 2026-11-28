@@ -206,45 +206,8 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-  malware:
-    needs: prepare
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    steps:
-      - name: Checkout trusted scanner
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          persist-credentials: false
-      - name: Prepare pinned ClamAV and refresh official signatures
-        env:
-          CLAMAV_STATE_DIR: ${{ runner.temp }}/program-clamav
-        run: python3 scripts/malware_scan.py prepare "$CLAMAV_STATE_DIR"
-      - name: Checkout pinned public candidate as data
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          repository: ${{ needs.prepare.outputs.repository }}
-          ref: ${{ needs.prepare.outputs.source_commit }}
-          path: candidate
-          submodules: false
-          lfs: false
-          persist-credentials: false
-      - name: Check tracked files for malware signatures
-        env:
-          REQUEST_ID: ${{ needs.prepare.outputs.request_id }}
-          CLAMAV_STATE_DIR: ${{ runner.temp }}/program-clamav
-          SOURCE_COMMIT: ${{ needs.prepare.outputs.source_commit }}
-        run: python3 scripts/malware_scan.py program "$CLAMAV_STATE_DIR" candidate "program-results/$REQUEST_ID/malware.json"
-      - name: Preserve malware evidence
-        if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-        with:
-          name: program-part-${{ github.run_id }}-malware
-          path: program-results/
-          if-no-files-found: ignore
-          retention-days: 7
-
   aggregate:
-    needs: [prepare, codeql, osv, embedded_skills, malware]
+    needs: [prepare, codeql, osv, embedded_skills]
     if: always() && needs.prepare.result == 'success'
     runs-on: ubuntu-24.04
     timeout-minutes: 10

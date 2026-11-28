@@ -2,6 +2,11 @@
 
 Use MAJOR.MINOR.PATCH for portable Skill Scanner packages. This version is separate from NVIDIA SkillSpector's version and the scanned skill's source commit. Earlier downloads were unversioned; no historical release numbers have been invented.
 
+## 0.14.0 — November 28, 2026
+
+- Remove dedicated ClamAV scanning and signature freshness gates. Preserve CodeQL, OSV, SkillSpector, on-demand retrieval and explicit AI-skill deployment approval.
+- Use program-v4 and skill-v3 caches; disclose antivirus scanning is not included.
+
 ## 0.12.0 — November 28, 2026
 
 - Add pinned, isolated ClamAV file inspection to both GitHub scan paths. Publish signature versions, freshness, and explicit incomplete coverage.

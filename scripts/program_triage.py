@@ -47,17 +47,16 @@ def analyze(rid):
                     vulnerabilities[str(match.get("id","unknown"))].add(package_name)
     embedded = report.get("embedded_skills", {})
     embedded_hits = sum(x.get("findings") or 0 for x in embedded.get("results", []))
-    malware = report["malware"]
     if report["state"] == "incomplete":
         advisory = "Scan coverage incomplete"
-        reason = "One or more configured checks had missing, failed, stale, or limited evidence."
+        reason = "One or more configured checks had missing, failed, or limited evidence."
     elif report["state"] == "needs_review":
         advisory = "Findings require review"
         reason = "The configured checks reported unresolved findings. See the analyzer results below."
     else:
         advisory = "No findings in completed static checks"
         reason = "Configured checks completed without reported findings. Runtime behavior remains unverified."
-    eligibility = "eligible_for_approval" if malware["status"] == "clean" and report["state"] == "review_required" else "blocked"
+    eligibility = "eligible_for_approval" if report["state"] == "review_required" else "blocked"
     triage = {"codeql_unique_rule_locations":len(distinct_locations),
        "codeql_levels":dict(severities),"codeql_examples":codeql_examples,
        "osv_distinct_vulnerability_ids":len(vulnerabilities),
@@ -76,9 +75,7 @@ def analyze(rid):
        f"OSV matches: {report.get('osv',{}).get('vulnerabilities')} "
        f"(distinct IDs: {len(vulnerabilities)}). "
        f"Embedded skill findings: {embedded_hits}; coverage: {embedded.get('status')}.\n\n"
-       f"ClamAV: {malware['status']}. {malware['reason']} "
-       f"Signature matches: {sum(item['kind'] == 'malware_signature' for item in malware.get('findings', []))}. "
-       f"Heuristic alerts: {sum(item['kind'] == 'heuristic' for item in malware.get('findings', []))}.\n\n"
+       "Dedicated antivirus scanning is not included.\n\n"
        f"Deployment eligibility: {eligibility.replace('_', ' ')}."
        "\n\nNo candidate was installed or activated. Distribution requires explicit approval.\n")
     (folder/"decision.md").write_text(markdown)

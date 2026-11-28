@@ -3,7 +3,7 @@ Never imports, installs, builds, or launches candidate code.
 """
 import json, os, pathlib, re, subprocess, sys, urllib.parse, urllib.request
 
-from malware_scan import PROGRAM_PIPELINE, read_evidence
+PROGRAM_PIPELINE = "program-v4"
 
 ROOT=pathlib.Path("program-results")
 ID=re.compile(r"[a-z0-9][a-z0-9-]{7,63}$")
@@ -67,9 +67,9 @@ def summarize():
     codeql=os.environ.get("CODEQL_STATUS","unknown")
     osv=os.environ.get("OSV_STATUS","unknown")
     report={"schema_version":2,"target_kind":"software_program","request_id":rid,**req,
-            "scan_mode":"static_code_dependency_and_malware","codeql":{"status":codeql,"sarif_findings":None},
+            "scan_mode":"static_code_and_dependency","codeql":{"status":codeql,"sarif_findings":None},
             "osv":{"status":osv,"vulnerabilities":None},
-            "limitations":["Not a full security guarantee","No candidate application installation, startup, tests, or build was authorized",
+            "antivirus_included":False,"limitations":["Dedicated antivirus scanning is not included","Not a full security guarantee","No candidate application installation, startup, tests, or build was authorized",
                            "Only supported CodeQL languages and OSV-recognized package inventories are covered",
                            "External runtime services, secrets handling, and dynamic behavior are not verified"],
             "review_required":True,"publication_approved":False}
@@ -116,17 +116,15 @@ def summarize():
     else:
         embedded={"status":"incomplete","results":[],"error":"Embedded skill scan did not complete"}
     report["embedded_skills"]=embedded
-    malware = read_evidence(folder / "malware.json")
-    report["malware"] = malware
     has_skill_findings=any((item.get("findings") or 0)>0 or (item.get("risk_severity") or "").upper() in {"MEDIUM","HIGH","CRITICAL"} for item in embedded.get("results",[]))
-    if report["codeql"]["status"]=="incomplete" or report["osv"]["status"]=="incomplete" or embedded["status"] in {"partial","incomplete"} or malware.get("coverage_complete") is not True:
+    if report["codeql"]["status"]=="incomplete" or report["osv"]["status"]=="incomplete" or embedded["status"] in {"partial","incomplete"}:
         state="incomplete"
-    elif report["codeql"]["sarif_findings"] or report["osv"]["vulnerabilities"] or has_skill_findings or malware["status"] != "clean":
+    elif report["codeql"]["sarif_findings"] or report["osv"]["vulnerabilities"] or has_skill_findings:
         state="needs_review"
     else:
         state="review_required"
     report["state"]=state
-    summary={key:report[key] for key in ["schema_version","target_kind","request_id","repository_url","source_commit","scan_mode","state","codeql","osv","malware","review_required","publication_approved"]}
+    summary={key:report[key] for key in ["schema_version","target_kind","request_id","repository_url","source_commit","scan_mode","state","codeql","osv","antivirus_included","review_required","publication_approved"]}
     summary["embedded_skills"]={"status":embedded.get("status"),"discovered_count":embedded.get("discovered_count"),"selected_count":embedded.get("selected_count"),"findings":sum(v.get("findings") or 0 for v in embedded.get("results",[]))}
     summary["pipeline_version"]=PROGRAM_PIPELINE
     summary["report_path"]=f".scan-results/{rid}/report.json"
