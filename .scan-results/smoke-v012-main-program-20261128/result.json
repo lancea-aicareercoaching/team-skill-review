@@ -1,0 +1,72 @@
+{
+  "schema_version": 2,
+  "target_kind": "software_program",
+  "request_id": "smoke-v012-main-program-20261128",
+  "repository_url": "https://github.com/psf/requests",
+  "source_commit": "3c7baaa05ab4aa49cc819ce3a819d260de19c157",
+  "scan_mode": "static_code_dependency_and_malware",
+  "state": "incomplete",
+  "codeql": {
+    "status": "success",
+    "sarif_findings": 9
+  },
+  "osv": {
+    "status": "findings",
+    "vulnerabilities": 4,
+    "sources_checked": 1
+  },
+  "malware": {
+    "policy_version": "clamav-v1",
+    "image": "docker.io/clamav/clamav@sha256:64e30c0bf976198024deb3dc6d5cfe2485fb969c0f73549ba0fdb364b9469614",
+    "status": "limited",
+    "reason": "ClamAV coverage was limited.",
+    "coverage_complete": false,
+    "findings": [],
+    "files_reported": 128,
+    "engine_version": "1.5.5",
+    "signatures": {
+      "databases": {
+        "main": {
+          "version": 63,
+          "built_at": "2025-12-16T23:18:22+00:00",
+          "sha256": "0b2182d229f46981ec8f535382222f7c9dfdd656b250ad47988b910a8d302365"
+        },
+        "daily": {
+          "version": 28194,
+          "built_at": "2026-11-25T06:26:59+00:00",
+          "sha256": "7122122fb8e8be5130069c461fa375dd30c57937cc4075666d0b03a6c42e3167"
+        },
+        "bytecode": {
+          "version": 339,
+          "built_at": "2025-09-11T12:29:19+00:00",
+          "sha256": "6d4aa01f219e988060fc419f495d07f27e0cdf1a2cccc065971da922c76f7ffb"
+        }
+      },
+      "valid_until": "2026-11-28T06:26:59+00:00"
+    },
+    "update_exit_code": 0,
+    "files_staged": 128,
+    "coverage_limits": [
+      "Symlinks or submodules were excluded."
+    ]
+  },
+  "review_required": true,
+  "publication_approved": false,
+  "embedded_skills": {
+    "status": "none_found",
+    "discovered_count": 0,
+    "selected_count": 0,
+    "findings": 0
+  },
+  "pipeline_version": "program-v3",
+  "report_path": ".scan-results/smoke-v012-main-program-20261128/report.json",
+  "run_url": "https://github.com/lancea-aicareercoaching/team-skill-review/actions/runs/46111342926",
+  "advisory": "Scan coverage incomplete",
+  "advisory_reason": "One or more configured checks had missing, failed, stale, or limited evidence.",
+  "deployment_eligibility": "blocked",
+  "triage": {
+    "codeql_unique_rule_locations": 9,
+    "osv_distinct_vulnerability_ids": 4,
+    "embedded_skill_findings": 0
+  }
+}
