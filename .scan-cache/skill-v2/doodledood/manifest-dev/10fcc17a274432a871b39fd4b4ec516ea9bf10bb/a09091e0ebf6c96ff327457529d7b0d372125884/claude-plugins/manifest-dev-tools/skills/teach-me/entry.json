@@ -1,0 +1,43 @@
+{
+  "repository_url": "https://github.com/doodledood/manifest-dev",
+  "source_commit": "10fcc17a274432a871b39fd4b4ec516ea9bf10bb",
+  "scanner_commit": "a09091e0ebf6c96ff327457529d7b0d372125884",
+  "skill_path": "claude-plugins/manifest-dev-tools/skills/teach-me",
+  "request_id": "smoke-v012-skill-20261128",
+  "state": "no_findings",
+  "pipeline_version": "skill-v2",
+  "malware": {
+    "policy_version": "clamav-v1",
+    "image": "docker.io/clamav/clamav@sha256:64e30c0bf976198024deb3dc6d5cfe2485fb969c0f73549ba0fdb364b9469614",
+    "status": "clean",
+    "reason": "ClamAV reported no signature or heuristic alerts in the inspected files.",
+    "coverage_complete": true,
+    "findings": [],
+    "files_reported": 1,
+    "engine_version": "1.5.5",
+    "signatures": {
+      "databases": {
+        "main": {
+          "version": 63,
+          "built_at": "2025-12-16T23:18:22+00:00",
+          "sha256": "0b2182d229f46981ec8f535382222f7c9dfdd656b250ad47988b910a8d302365"
+        },
+        "daily": {
+          "version": 28194,
+          "built_at": "2026-11-25T06:26:59+00:00",
+          "sha256": "a1854c4aaa0991d68b984e6b26c73a849cd6d24859b0a0d3e099bca00e66ebc2"
+        },
+        "bytecode": {
+          "version": 339,
+          "built_at": "2025-09-11T12:29:19+00:00",
+          "sha256": "6d4aa01f219e988060fc419f495d07f27e0cdf1a2cccc065971da922c76f7ffb"
+        }
+      },
+      "valid_until": "2026-11-28T06:26:59+00:00"
+    },
+    "update_exit_code": 0,
+    "files_staged": 1
+  },
+  "result_path": ".scan-results/smoke-v012-skill-20261128/result.json",
+  "report_path": ".scan-results/smoke-v012-skill-20261128/report.json"
+}
