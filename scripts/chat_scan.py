@@ -309,7 +309,30 @@ def publish(folder, api=github_api):
     status = json.loads((Path(folder) / "result.json").read_text(encoding="utf-8"))
     if status.get("request_id") != rid:
         raise ValueError("Result does not match request")
-    for name in ("report.json", "decision.md", "result.json"):
+    evidence_names = []
+    if status.get("contextual_evidence_version") == 2:
+        manifest = json.loads((Path(folder) / "report.json").read_text())["contextual_evidence"]
+        if manifest.get("schema_version") != 2 or manifest.get("request_id") != rid or manifest.get("source_commit") != status.get("source_commit"):
+            raise ValueError("Evidence manifest identity mismatch")
+        for kind in ("codeql", "osv"):
+            section = manifest[kind]
+            count = 0
+            for number, page in enumerate(section["pages"], 1):
+                name = f"evidence-{kind}-{number:06d}.json"
+                if page["path"] != name or page["page"] != number:
+                    raise ValueError("Invalid evidence page name or sequence")
+                path = Path(folder) / name
+                if path.is_symlink() or not path.is_file() or path.stat().st_size > 900000:
+                    raise ValueError("Unsafe or missing evidence page")
+                payload = path.read_bytes()
+                data = json.loads(payload)
+                if hashlib.sha256(payload).hexdigest() != page["sha256"] or data.get("request_id") != rid or data.get("source_commit") != status.get("source_commit") or data.get("analyzer") != kind or data.get("page") != number or data.get("schema_version") != 2 or len(data["records"]) != page["count"]:
+                    raise ValueError("Evidence page mismatch")
+                count += page["count"]
+                evidence_names.append(name)
+            if count != section["included_records"] or count != section["total_records"] or section["truncated"]:
+                raise ValueError("Incomplete evidence pagination")
+    for name in (*evidence_names, "report.json", "decision.md", "result.json"):
         file = Path(folder) / name
         if not file.exists():
             continue

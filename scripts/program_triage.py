@@ -4,21 +4,57 @@ No candidate programs, skills, scripts, or install commands are executed.
 Recommendations are evidence-limited; they never authorize installation.
 """
 import collections
+import hashlib
 import json
 import os
 from pathlib import Path
 
-def bounded_records(records, budget=400000):
-    kept = []
+def severity_band(row):
+    raw = row.get("security_severity")
+    if raw is None:
+        raw = (row.get("database_specific") or {}).get("severity")
+    if isinstance(raw, str) and raw.lower() in {"critical", "high", "medium", "low"}:
+        return raw.lower()
+    try:
+        score = float(raw)
+        if 0 <= score <= 10:
+            return "critical" if score >= 9 else "high" if score >= 7 else "medium" if score >= 4 else "low"
+    except (ValueError, TypeError):
+        pass
+    return "unknown"
+
+def paginated_records(folder, rid, commit, kind, records, budget=120000):
+    priority = {"critical": 0, "high": 1, "unknown": 2, "medium": 3, "low": 4}
+    rows = sorted(records, key=lambda row: priority[severity_band(row)])
+    pages = []
+    batch = []
     used = 0
-    for row in records:
-        size = len(json.dumps(row, ensure_ascii=True).encode())
-        if len(kept) >= 2000 or used + size > budget:
-            continue
-        kept.append(row)
+    def flush():
+        if not batch:
+            return
+        number = len(pages) + 1
+        name = f"evidence-{kind}-{number:06d}.json"
+        data = {"schema_version": 2, "request_id": rid, "source_commit": commit,
+                "analyzer": kind, "page": number, "records": batch}
+        payload = (json.dumps(data, ensure_ascii=True, separators=(",", ":")) + "\n").encode()
+        if len(payload) > 900000:
+            raise ValueError("Individual evidence page exceeds safe publication size")
+        (folder / name).write_bytes(payload)
+        pages.append({"path": name, "page": number, "count": len(batch),
+                      "sha256": hashlib.sha256(payload).hexdigest()})
+    for row in rows:
+        row = dict(row, severity_band=severity_band(row))
+        size = len(json.dumps(row, ensure_ascii=True, separators=(",", ":")).encode()) + 1
+        if batch and used + size > budget:
+            flush()
+            batch = []
+            used = 0
+        batch.append(row)
         used += size
-    return {"records": kept, "total_records": len(records),
-            "included_records": len(kept), "truncated": len(kept) != len(records)}
+    flush()
+    return {"total_records": len(rows), "included_records": sum(p["count"] for p in pages),
+            "truncated": False, "pages": pages,
+            "severity_counts": dict(collections.Counter(severity_band(row) for row in rows))}
 
 def codeql_detail(issue, rule):
     properties = rule.get("properties", {})
@@ -106,13 +142,15 @@ def analyze(rid):
     result.update(advisory=advisory,advisory_reason=reason,deployment_eligibility=eligibility,triage={
       "codeql_unique_rule_locations":len(distinct_locations),
       "osv_distinct_vulnerability_ids":len(vulnerabilities),"embedded_skill_findings":embedded_hits})
-    report["contextual_evidence"] = {"schema_version": 1,
-        "codeql": bounded_records(codeql_details), "osv": bounded_records(osv_details),
+    report["contextual_evidence"] = {"schema_version": 2,
+        "request_id": rid, "source_commit": report["source_commit"],
+        "codeql": paginated_records(folder, rid, report["source_commit"], "codeql", codeql_details),
+        "osv": paginated_records(folder, rid, report["source_commit"], "osv", osv_details),
         "limitations": ["Scanner-reported evidence, not a determination of exploitability.",
                         "Missing severity, affected ranges or dependency groups remain unknown.",
                         "Truncated evidence does not establish clearance.",
                         "Dependency declarations do not establish installed runtime versions."]}
-    result["contextual_evidence_version"] = 1
+    result["contextual_evidence_version"] = 2
     report.update(advisory=advisory,advisory_reason=reason,deployment_eligibility=eligibility,triage=triage,
       advisory_scope="Advisory assessment of configured static checks only; never automatic installation or publication.")
     report_file.write_text(json.dumps(report,indent=2)+"\n")
