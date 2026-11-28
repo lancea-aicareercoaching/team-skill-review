@@ -8,6 +8,43 @@ import json
 import os
 from pathlib import Path
 
+def bounded_records(records, budget=400000):
+    kept = []
+    used = 0
+    for row in records:
+        size = len(json.dumps(row, ensure_ascii=True).encode())
+        if len(kept) >= 2000 or used + size > budget:
+            continue
+        kept.append(row)
+        used += size
+    return {"records": kept, "total_records": len(records),
+            "included_records": len(kept), "truncated": len(kept) != len(records)}
+
+def codeql_detail(issue, rule):
+    properties = rule.get("properties", {})
+    return {"rule": issue.get("ruleId"), "level": issue.get("level") or rule.get("defaultConfiguration", {}).get("level"),
+            "security_severity": properties.get("security-severity"), "precision": properties.get("precision"),
+            "help_uri": rule.get("helpUri"), "tags": properties.get("tags"),
+            "message": str(issue.get("message", {}).get("text", ""))[:2000],
+            "locations": (issue.get("locations") or [])[:5],
+            "location_count": len(issue.get("locations") or []),
+            "has_code_flow": bool(issue.get("codeFlows"))}
+
+def osv_detail(match, package, group):
+    affected = []
+    for a in match.get("affected", [])[:30]:
+        affected.append({"package": a.get("package"), "ranges": a.get("ranges", [])[:30],
+                         "ranges_truncated": len(a.get("ranges", [])) > 30,
+                         "versions": a.get("versions", [])[:50],
+                         "versions_truncated": len(a.get("versions", [])) > 50})
+    return {"id": match.get("id"), "aliases": match.get("aliases", [])[:30],
+            "package": package.get("package"), "inventory": group.get("source"),
+            "dependency_groups": package.get("dependency_groups"),
+            "summary": str(match.get("summary", ""))[:1500], "severity": match.get("severity"),
+            "database_specific": match.get("database_specific"), "withdrawn": match.get("withdrawn"),
+            "affected": affected, "affected_truncated": len(match.get("affected", [])) > 30,
+            "references": match.get("references", [])[:15]}
+
 def analyze(rid):
     folder = Path("program-results") / rid
     summary_file = folder / "result.json"
@@ -16,6 +53,8 @@ def analyze(rid):
     report = json.loads(report_file.read_text())
     distinct_locations = set()
     codeql_examples = []
+    codeql_details = []
+    osv_details = []
     severities = collections.Counter()
     for path in (sorted((folder / "sarif").rglob("*.sarif")) if (folder / "sarif").exists() and report.get("codeql",{}).get("status") == "success" else []):
         data = json.loads(path.read_text())
@@ -26,6 +65,7 @@ def analyze(rid):
                 where = (issue.get("locations") or [{}])[0].get("physicalLocation", {})
                 loc = where.get("artifactLocation", {}).get("uri", "")
                 line = where.get("region", {}).get("startLine")
+                codeql_details.append(codeql_detail(issue, rules.get(rule, {})))
                 fingerprint = (rule, loc, line)
                 if fingerprint in distinct_locations:
                     continue
@@ -45,6 +85,7 @@ def analyze(rid):
                 package_name = str(info.get("name") or info.get("package_name") or "unknown")
                 for match in package.get("vulnerabilities", []):
                     vulnerabilities[str(match.get("id","unknown"))].add(package_name)
+                    osv_details.append(osv_detail(match, package, group))
     embedded = report.get("embedded_skills", {})
     embedded_hits = sum(x.get("findings") or 0 for x in embedded.get("results", []))
     if report["state"] == "incomplete":
@@ -65,6 +106,13 @@ def analyze(rid):
     result.update(advisory=advisory,advisory_reason=reason,deployment_eligibility=eligibility,triage={
       "codeql_unique_rule_locations":len(distinct_locations),
       "osv_distinct_vulnerability_ids":len(vulnerabilities),"embedded_skill_findings":embedded_hits})
+    report["contextual_evidence"] = {"schema_version": 1,
+        "codeql": bounded_records(codeql_details), "osv": bounded_records(osv_details),
+        "limitations": ["Scanner-reported evidence, not a determination of exploitability.",
+                        "Missing severity, affected ranges or dependency groups remain unknown.",
+                        "Truncated evidence does not establish clearance.",
+                        "Dependency declarations do not establish installed runtime versions."]}
+    result["contextual_evidence_version"] = 1
     report.update(advisory=advisory,advisory_reason=reason,deployment_eligibility=eligibility,triage=triage,
       advisory_scope="Advisory assessment of configured static checks only; never automatic installation or publication.")
     report_file.write_text(json.dumps(report,indent=2)+"\n")

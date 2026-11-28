@@ -2,6 +2,10 @@
 
 Use MAJOR.MINOR.PATCH for portable Skill Scanner packages. This version is separate from NVIDIA SkillSpector's version and the scanned skill's source commit. Earlier downloads were unversioned; no historical release numbers have been invented.
 
+## Backend contextual evidence extension v1
+
+- Preserve bounded detailed CodeQL, OSV and embedded SkillSpector evidence with truncation flags. No new scanners, cache changes or deployment exceptions.
+
 ## 0.14.0 — November 28, 2026
 
 - Remove dedicated ClamAV scanning and signature freshness gates. Preserve CodeQL, OSV, SkillSpector, on-demand retrieval and explicit AI-skill deployment approval.

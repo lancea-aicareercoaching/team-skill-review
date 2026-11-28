@@ -28,3 +28,7 @@ Dedicated antivirus scanning is not included. Reuse only exact-source program-v4
 Verify the job set and the published result, report and decision against the exact request and immutable source. Reports with findings or coverage gaps block deployment eligibility. A clean static report leaves runtime behavior unverified and never authorizes installation or publication. Only AI-skill scans can lead to an installation offer.
 
 **Default routing:** A repository-root link for a software program uses the combined program job without requiring the user to separately request SKILL.md checks; a direct link to an individual SKILL.md uses the AI-skill workflow. This is on-demand per link, not scheduled monitoring of repositories.
+
+## Contextual evidence (report extension v1)
+
+New program reports preserve bounded per-finding CodeQL severity, precision, message and locations; OSV declared package/version, inventory, dependency groups where reported, native severity/CVSS vectors, affected ranges and fix events, and advisory references; and native embedded SkillSpector issue fields. Counts and truncation flags identify omitted records. Missing fields remain unknown; do not infer installed versions, dependency scope or exploitability. This does not change scan decisions, deployment gates or cache keys. Historical reports remain valid within their original scope. Explicitly request a fresh scan if richer evidence is needed.

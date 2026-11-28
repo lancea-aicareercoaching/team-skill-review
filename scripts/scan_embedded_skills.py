@@ -60,9 +60,19 @@ def scan():
                 item["risk_score"]=assessment.get("score")
                 item["risk_severity"]=assessment.get("severity")
                 item["findings"]=len(detail.get("issues",[]))
-                item["issues"]=[{"id":v.get("id"),"severity":v.get("severity"),
-                                 "description":str(v.get("description",""))[:250]}
-                                for v in detail.get("issues",[])[:15]]
+                issues = detail.get("issues", [])
+                item["issues"] = []
+                used = 0
+                for v in issues:
+                    size = len(json.dumps(v, ensure_ascii=True).encode())
+                    if len(item["issues"]) >= 100 or used + size > 24000:
+                        continue
+                    item["issues"].append(v)
+                    used += size
+                item["issues_included"] = len(item["issues"])
+                item["issues_truncated"] = len(item["issues"]) != len(issues)
+                item["analysis_completeness"] = {k: complete.get(k) for k in ("status", "is_complete", "coverage_percent")}
+                item["risk_recommendation"] = assessment.get("recommendation")
         except (OSError, ValueError, json.JSONDecodeError, subprocess.TimeoutExpired) as exc:
             item["error"]=str(exc)[:250]
             record["status"]="partial"
