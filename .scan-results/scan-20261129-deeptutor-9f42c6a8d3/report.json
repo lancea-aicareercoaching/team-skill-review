@@ -1,0 +1,526 @@
+{
+  "schema_version": 2,
+  "target_kind": "software_program",
+  "request_id": "scan-20261129-deeptutor-9f42c6a8d3",
+  "repository_url": "https://github.com/HKUDS/DeepTutor",
+  "source_commit": "c929888e783bcf55d73444eb838a7e1e032db0b0",
+  "pipeline_version": "program-v4",
+  "scan_mode": "static_code_and_dependency",
+  "codeql": {
+    "status": "success",
+    "sarif_findings": 499
+  },
+  "osv": {
+    "status": "findings",
+    "vulnerabilities": 519,
+    "sources_checked": 5
+  },
+  "antivirus_included": false,
+  "limitations": [
+    "Dedicated antivirus scanning is not included",
+    "Not a full security guarantee",
+    "No candidate application installation, startup, tests, or build was authorized",
+    "Only supported CodeQL languages and OSV-recognized package inventories are covered",
+    "External runtime services, secrets handling, and dynamic behavior are not verified"
+  ],
+  "review_required": true,
+  "publication_approved": false,
+  "embedded_skills": {
+    "status": "complete",
+    "discovered_count": 6,
+    "scan_limit": 12,
+    "selected_count": 6,
+    "scope": "SKILL.md instruction file only; adjacent scripts/dependencies not covered",
+    "results": [
+      {
+        "path": "SKILL.md",
+        "status": "complete",
+        "findings": 1,
+        "sha256": "1eca34a7674b2b4cdc8039575281d5b85d457c3f1d8257bc4b42825d116336ec",
+        "risk_score": 8,
+        "risk_severity": "LOW",
+        "issues": [
+          {
+            "id": "EA2",
+            "finding_id": "finding-45e74ba198bf46479c35d8d5cd206f9c",
+            "category": "Excessive Agency",
+            "pattern": "Autonomous Decision Making",
+            "severity": "MEDIUM",
+            "confidence": 0.85,
+            "location": {
+              "file": "SKILL.md",
+              "start_line": 159,
+              "end_line": null,
+              "start_column": 17
+            },
+            "finding": "Skip confirmation",
+            "explanation": "Skill enables autonomous high-impact decisions without human-in-the-loop verification. Critical operations (destructive commands, financial transactions, data deletion) should require explicit user confirmation.",
+            "remediation": "Add human-in-the-loop confirmation for destructive, irreversible, or high-impact operations. Never auto-execute commands that modify files, send data, or alter system state.",
+            "code_snippet": "```bash\ndeeptutor memory show [<target>]    # target: L3 (all global docs, default) | L2 (all surfaces) | a doc name (e.g. profile, chat)\ndeeptutor memory clear [<target>]   # target: all (default) | trace (all L1) | a surface name (clears that surface's L1)\n#   --force/-f   Skip confirmation\n```\n\n### Sessions",
+            "intent": null,
+            "tags": [
+              "Excessive Agency"
+            ],
+            "evidence": {},
+            "match_fingerprint": "f2585ed1a9f8ffe69bade4f4a85869690c663180a11cc20f5d4a1c41371c139d",
+            "occurrences": [
+              {
+                "file": "SKILL.md",
+                "start_line": 159,
+                "end_line": null,
+                "start_column": 17
+              }
+            ],
+            "surface": "instructions"
+          }
+        ],
+        "issues_included": 1,
+        "issues_truncated": false,
+        "analysis_completeness": {
+          "status": "complete_with_caveats",
+          "is_complete": true,
+          "coverage_percent": 100.0
+        },
+        "risk_recommendation": "SAFE"
+      },
+      {
+        "path": "deeptutor/skills/builtin/docx/SKILL.md",
+        "status": "complete",
+        "findings": 0,
+        "sha256": "66afa8c19a53db613ecdd7e45709210db66b8937638325b15c054e8df719f5f6",
+        "risk_score": 0,
+        "risk_severity": "LOW",
+        "issues": [],
+        "issues_included": 0,
+        "issues_truncated": false,
+        "analysis_completeness": {
+          "status": "complete_with_caveats",
+          "is_complete": true,
+          "coverage_percent": 100.0
+        },
+        "risk_recommendation": "SAFE"
+      },
+      {
+        "path": "deeptutor/skills/builtin/pdf/SKILL.md",
+        "status": "complete",
+        "findings": 1,
+        "sha256": "c950efb9d180879b978f765cfc0e6f217669231a62e618054ebff6df1002a8e3",
+        "risk_score": 7,
+        "risk_severity": "LOW",
+        "issues": [
+          {
+            "id": "EA2",
+            "finding_id": "finding-15258da91b6b496189a404bed6f7aa2a",
+            "category": "Excessive Agency",
+            "pattern": "Autonomous Decision Making",
+            "severity": "MEDIUM",
+            "confidence": 0.75,
+            "location": {
+              "file": "SKILL.md",
+              "start_line": 26,
+              "end_line": null,
+              "start_column": 268
+            },
+            "finding": "without asking",
+            "explanation": "Skill enables autonomous high-impact decisions without human-in-the-loop verification. Critical operations (destructive commands, financial transactions, data deletion) should require explicit user confirmation.",
+            "remediation": "Add human-in-the-loop confirmation for destructive, irreversible, or high-impact operations. Never auto-execute commands that modify files, send data, or alter system state.",
+            "code_snippet": "reopening, and validating the PDF in one call; later calls can revise the same\nrelative filename. Follow the turn's **User workspace** instructions for\nlocating inputs, output boundaries, and presenting the finished file.\nPreserve an explicitly requested quantity (such as 500 words) and verify the count in the output before finishing. If execution fails or the artifact is missing, diagnose stderr/root cause and change strategy; do not retry identical code or reduce the requested scope without asking.\n\n## Extract text and tables (pdfplumber)\n",
+            "intent": null,
+            "tags": [
+              "Excessive Agency"
+            ],
+            "evidence": {},
+            "match_fingerprint": "8dc77d3dce9ba1f2672e813265a1b1a0c8594866ef38a4e978bf4f4451795465",
+            "occurrences": [
+              {
+                "file": "SKILL.md",
+                "start_line": 26,
+                "end_line": null,
+                "start_column": 268
+              }
+            ],
+            "surface": "instructions"
+          }
+        ],
+        "issues_included": 1,
+        "issues_truncated": false,
+        "analysis_completeness": {
+          "status": "complete_with_caveats",
+          "is_complete": true,
+          "coverage_percent": 100.0
+        },
+        "risk_recommendation": "SAFE"
+      },
+      {
+        "path": "deeptutor/skills/builtin/pptx/SKILL.md",
+        "status": "complete",
+        "findings": 0,
+        "sha256": "72e6ecbc8b3194bfbd2d4230abbbd0df2e1f1bfaa5348f0b05b778475edfd009",
+        "risk_score": 0,
+        "risk_severity": "LOW",
+        "issues": [],
+        "issues_included": 0,
+        "issues_truncated": false,
+        "analysis_completeness": {
+          "status": "complete_with_caveats",
+          "is_complete": true,
+          "coverage_percent": 100.0
+        },
+        "risk_recommendation": "SAFE"
+      },
+      {
+        "path": "deeptutor/skills/builtin/skill-creator/SKILL.md",
+        "status": "complete",
+        "findings": 0,
+        "sha256": "158a8544c752c7aca824d74d51bd3d59b70e36369218d22b52424d4054109b18",
+        "risk_score": 0,
+        "risk_severity": "LOW",
+        "issues": [],
+        "issues_included": 0,
+        "issues_truncated": false,
+        "analysis_completeness": {
+          "status": "complete",
+          "is_complete": true,
+          "coverage_percent": 100.0
+        },
+        "risk_recommendation": "SAFE"
+      },
+      {
+        "path": "deeptutor/skills/builtin/xlsx/SKILL.md",
+        "status": "complete",
+        "findings": 0,
+        "sha256": "9f5e476f8692ff737bf3251d00e71e52e9b6a9f3837b78914f428022fba89868",
+        "risk_score": 0,
+        "risk_severity": "LOW",
+        "issues": [],
+        "issues_included": 0,
+        "issues_truncated": false,
+        "analysis_completeness": {
+          "status": "complete_with_caveats",
+          "is_complete": true,
+          "coverage_percent": 100.0
+        },
+        "risk_recommendation": "SAFE"
+      }
+    ]
+  },
+  "state": "needs_review",
+  "run_url": "https://github.com/lancea-aicareercoaching/team-skill-review/actions/runs/46171453279",
+  "contextual_evidence": {
+    "schema_version": 2,
+    "request_id": "scan-20261129-deeptutor-9f42c6a8d3",
+    "source_commit": "c929888e783bcf55d73444eb838a7e1e032db0b0",
+    "codeql": {
+      "total_records": 499,
+      "included_records": 499,
+      "truncated": false,
+      "pages": [
+        {
+          "path": "evidence-codeql-000001.json",
+          "page": 1,
+          "count": 206,
+          "sha256": "adb8d074e23f39e3e000833b7dfe965bfceb819d98462354655d33761304c0b3"
+        },
+        {
+          "path": "evidence-codeql-000002.json",
+          "page": 2,
+          "count": 220,
+          "sha256": "fb8bb54c03b33197f83c0216c0bf01afb1687d2118b8eeb2992195edc9753625"
+        },
+        {
+          "path": "evidence-codeql-000003.json",
+          "page": 3,
+          "count": 73,
+          "sha256": "9e1782ce667ae318171b757d15fa8085515735d65594288c5c308e87578a803b"
+        }
+      ],
+      "severity_counts": {
+        "unknown": 499
+      }
+    },
+    "osv": {
+      "total_records": 519,
+      "included_records": 519,
+      "truncated": false,
+      "pages": [
+        {
+          "path": "evidence-osv-000001.json",
+          "page": 1,
+          "count": 57,
+          "sha256": "b0cc3c99ec9555673abc40941f46a772f84e8e408aa11517cb2ec7ea0070104c"
+        },
+        {
+          "path": "evidence-osv-000002.json",
+          "page": 2,
+          "count": 58,
+          "sha256": "9798043a6bb5f22d92c3e32a00084fb4e8f5070271410f9319688cc82c858f18"
+        },
+        {
+          "path": "evidence-osv-000003.json",
+          "page": 3,
+          "count": 61,
+          "sha256": "299b30bc229ae2d111b8341d3ac0648dba1840deecc304f588830f4d803e89d8"
+        },
+        {
+          "path": "evidence-osv-000004.json",
+          "page": 4,
+          "count": 71,
+          "sha256": "8f33bedfd657f34aee5a3d15c309d0ac4160b5442878c472f29177c8664c893a"
+        },
+        {
+          "path": "evidence-osv-000005.json",
+          "page": 5,
+          "count": 72,
+          "sha256": "115df34bf2831d33642bada9af500a37e14596ad63a765000def863c36b072af"
+        },
+        {
+          "path": "evidence-osv-000006.json",
+          "page": 6,
+          "count": 69,
+          "sha256": "a1e71c9a15d4d0af071e5e26a9522241bdd3687a70bf15eda9f16027be2999a4"
+        },
+        {
+          "path": "evidence-osv-000007.json",
+          "page": 7,
+          "count": 66,
+          "sha256": "2827f16ae26042e55f06f83d33f305d6c25c32fe860b12a12b7cafccf3f9da14"
+        },
+        {
+          "path": "evidence-osv-000008.json",
+          "page": 8,
+          "count": 63,
+          "sha256": "5f3d8b3b3839529c4daac0906b1a85fa5701469cd705f054911e514eb0ddd2c5"
+        },
+        {
+          "path": "evidence-osv-000009.json",
+          "page": 9,
+          "count": 2,
+          "sha256": "35bf8db04a56af91029e8b87529bd193ce3490c22eb9ef3224cd09c389c6304a"
+        }
+      ],
+      "severity_counts": {
+        "critical": 12,
+        "high": 129,
+        "unknown": 326,
+        "low": 52
+      }
+    },
+    "limitations": [
+      "Scanner-reported evidence, not a determination of exploitability.",
+      "Missing severity, affected ranges or dependency groups remain unknown.",
+      "Truncated evidence does not establish clearance.",
+      "Dependency declarations do not establish installed runtime versions."
+    ]
+  },
+  "advisory": "Findings require review",
+  "advisory_reason": "The configured checks reported unresolved findings. See the analyzer results below.",
+  "deployment_eligibility": "blocked",
+  "triage": {
+    "codeql_unique_rule_locations": 474,
+    "codeql_levels": {
+      "unknown": 474
+    },
+    "codeql_examples": [
+      {
+        "rule": "js/redos",
+        "level": "unknown",
+        "file": "candidate/web/lib/latex-normalize.ts",
+        "line": 29,
+        "message": "This part of the regular expression may cause exponential backtracking on strings containing many repetitions of '\\\\#'."
+      },
+      {
+        "rule": "js/redos",
+        "level": "unknown",
+        "file": "candidate/web/lib/markdown-display.ts",
+        "line": 147,
+        "message": "This part of the regular expression may cause exponential backtracking on strings containing many repetitions of '\\\\#'."
+      },
+      {
+        "rule": "js/incomplete-url-scheme-check",
+        "level": "unknown",
+        "file": "candidate/web/components/visualize/VisualizationViewer.tsx",
+        "line": 327,
+        "message": "This check does not consider vbscript:."
+      },
+      {
+        "rule": "js/xss-through-dom",
+        "level": "unknown",
+        "file": "candidate/web/components/settings/ServicePreviewPanel.tsx",
+        "line": 227,
+        "message": "[DOM text](1) is reinterpreted as HTML without escaping meta-characters."
+      },
+      {
+        "rule": "js/xss-through-dom",
+        "level": "unknown",
+        "file": "candidate/web/features/notes/components/AddToNote.tsx",
+        "line": 118,
+        "message": "[DOM text](1) is reinterpreted as HTML without escaping meta-characters."
+      },
+      {
+        "rule": "js/double-escaping",
+        "level": "unknown",
+        "file": "candidate/web/tests/reading-inline-markdown.test.ts",
+        "line": 16,
+        "message": "This replacement may produce '&' characters that are double-unescaped [here](1)."
+      },
+      {
+        "rule": "js/incomplete-multi-character-sanitization",
+        "level": "unknown",
+        "file": "candidate/web/lib/markdown-display.ts",
+        "line": 281,
+        "message": "This string may still contain [<script](1), which may cause an HTML element injection vulnerability."
+      },
+      {
+        "rule": "js/incomplete-multi-character-sanitization",
+        "level": "unknown",
+        "file": "candidate/web/lib/markdown-display.ts",
+        "line": 1008,
+        "message": "This string may still contain [<script](1), which may cause an HTML element injection vulnerability."
+      },
+      {
+        "rule": "js/incomplete-multi-character-sanitization",
+        "level": "unknown",
+        "file": "candidate/web/tests/reading-inline-markdown.test.ts",
+        "line": 16,
+        "message": "This string may still contain [<script](1), which may cause an HTML element injection vulnerability."
+      },
+      {
+        "rule": "js/incomplete-sanitization",
+        "level": "unknown",
+        "file": "candidate/web/lib/latex.ts",
+        "line": 251,
+        "message": "This does not escape backslash characters in the input."
+      },
+      {
+        "rule": "js/insecure-randomness",
+        "level": "unknown",
+        "file": "candidate/web/app/(workspace)/partners/groups/%5BgroupId%5D/page.tsx",
+        "line": 51,
+        "message": "This uses a cryptographically insecure random number generated at [Math.random()](1) in a security context.\nThis uses a cryptographically insecure random number generated at [Math.random()](2) in a security context."
+      },
+      {
+        "rule": "js/insecure-randomness",
+        "level": "unknown",
+        "file": "candidate/web/app/(workspace)/partners/%5BpartnerId%5D/page.tsx",
+        "line": 103,
+        "message": "This uses a cryptographically insecure random number generated at [Math.random()](1) in a security context."
+      },
+      {
+        "rule": "js/insecure-randomness",
+        "level": "unknown",
+        "file": "candidate/web/app/(workspace)/partners/%5BpartnerId%5D/page.tsx",
+        "line": 104,
+        "message": "This uses a cryptographically insecure random number generated at [Math.random()](1) in a security context."
+      },
+      {
+        "rule": "js/insufficient-password-hash",
+        "level": "unknown",
+        "file": "candidate/packages/chat-engine/src/providers/limits.ts",
+        "line": 45,
+        "message": "Password from [an access to apiKey](1) is hashed insecurely."
+      },
+      {
+        "rule": "js/regex/missing-regexp-anchor",
+        "level": "unknown",
+        "file": "candidate/web/lib/markdown-display.ts",
+        "line": 406,
+        "message": "Misleading operator precedence. The subexpression '^##\\s+(References|\u53c2\u8003\u6587\u732e|\u53c2\u8003\u8d44\u6599)' is anchored at the beginning, but the other parts of this regular expression are not"
+      }
+    ],
+    "osv_distinct_vulnerability_ids": 386,
+    "osv_examples": [
+      {
+        "id": "GHSA-22hg-r758-rrw9",
+        "packages": [
+          "pillow"
+        ]
+      },
+      {
+        "id": "GHSA-238p-pmpm-9mq7",
+        "packages": [
+          "katex"
+        ]
+      },
+      {
+        "id": "GHSA-24c4-3p7v-29cm",
+        "packages": [
+          "aiohttp"
+        ]
+      },
+      {
+        "id": "GHSA-24rc-8hj2-v98c",
+        "packages": [
+          "pillow"
+        ]
+      },
+      {
+        "id": "GHSA-254f-3936-288h",
+        "packages": [
+          "pillow"
+        ]
+      },
+      {
+        "id": "GHSA-27h8-gf7j-v5hc",
+        "packages": [
+          "pillow"
+        ]
+      },
+      {
+        "id": "GHSA-2883-xcg3-v3hh",
+        "packages": [
+          "js-yaml"
+        ]
+      },
+      {
+        "id": "GHSA-28qf-cpwq-vmc2",
+        "packages": [
+          "aiohttp"
+        ]
+      },
+      {
+        "id": "GHSA-2fqr-mr3j-6wp8",
+        "packages": [
+          "aiohttp"
+        ]
+      },
+      {
+        "id": "GHSA-2g87-pp6c-29x5",
+        "packages": [
+          "aiohttp"
+        ]
+      },
+      {
+        "id": "GHSA-2gqq-gqf2-x968",
+        "packages": [
+          "undici"
+        ]
+      },
+      {
+        "id": "GHSA-2jfj-6hjv-fm6j",
+        "packages": [
+          "undici"
+        ]
+      },
+      {
+        "id": "GHSA-2jhm-w3mp-jcwr",
+        "packages": [
+          "nltk"
+        ]
+      },
+      {
+        "id": "GHSA-2m5v-pch6-74hx",
+        "packages": [
+          "undici"
+        ]
+      },
+      {
+        "id": "GHSA-2v8p-3f2j-5mp7",
+        "packages": [
+          "mermaid"
+        ]
+      }
+    ],
+    "embedded_skill_findings": 2
+  },
+  "advisory_scope": "Advisory assessment of configured static checks only; never automatic installation or publication."
+}
