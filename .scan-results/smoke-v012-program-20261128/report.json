@@ -1,0 +1,173 @@
+{
+  "schema_version": 2,
+  "target_kind": "software_program",
+  "request_id": "smoke-v012-program-20261128",
+  "repository_url": "https://github.com/psf/requests",
+  "source_commit": "3c7baaa05ab4aa49cc819ce3a819d260de19c157",
+  "pipeline_version": "program-v3",
+  "scan_mode": "static_code_dependency_and_malware",
+  "codeql": {
+    "status": "success",
+    "sarif_findings": 9
+  },
+  "osv": {
+    "status": "findings",
+    "vulnerabilities": 4,
+    "sources_checked": 1
+  },
+  "limitations": [
+    "Not a full security guarantee",
+    "No candidate application installation, startup, tests, or build was authorized",
+    "Only supported CodeQL languages and OSV-recognized package inventories are covered",
+    "External runtime services, secrets handling, and dynamic behavior are not verified"
+  ],
+  "review_required": true,
+  "publication_approved": false,
+  "embedded_skills": {
+    "status": "none_found",
+    "discovered_count": 0,
+    "scan_limit": 12,
+    "selected_count": 0,
+    "scope": "SKILL.md instruction file only; adjacent scripts/dependencies not covered",
+    "results": []
+  },
+  "malware": {
+    "policy_version": "clamav-v1",
+    "image": "docker.io/clamav/clamav@sha256:64e30c0bf976198024deb3dc6d5cfe2485fb969c0f73549ba0fdb364b9469614",
+    "status": "limited",
+    "reason": "ClamAV coverage was limited.",
+    "coverage_complete": false,
+    "findings": [],
+    "files_reported": 128,
+    "engine_version": "1.5.5",
+    "signatures": {
+      "databases": {
+        "main": {
+          "version": 63,
+          "built_at": "2025-12-16T23:18:22+00:00",
+          "sha256": "0b2182d229f46981ec8f535382222f7c9dfdd656b250ad47988b910a8d302365"
+        },
+        "daily": {
+          "version": 28194,
+          "built_at": "2026-11-25T06:26:59+00:00",
+          "sha256": "a1854c4aaa0991d68b984e6b26c73a849cd6d24859b0a0d3e099bca00e66ebc2"
+        },
+        "bytecode": {
+          "version": 339,
+          "built_at": "2025-09-11T12:29:19+00:00",
+          "sha256": "6d4aa01f219e988060fc419f495d07f27e0cdf1a2cccc065971da922c76f7ffb"
+        }
+      },
+      "valid_until": "2026-11-28T06:26:59+00:00"
+    },
+    "update_exit_code": 0,
+    "files_staged": 128,
+    "coverage_limits": [
+      "Symlinks or submodules were excluded."
+    ]
+  },
+  "state": "incomplete",
+  "advisory": "Scan coverage incomplete",
+  "advisory_reason": "One or more configured checks had missing, failed, stale, or limited evidence.",
+  "deployment_eligibility": "blocked",
+  "triage": {
+    "codeql_unique_rule_locations": 9,
+    "codeql_levels": {
+      "unknown": 9
+    },
+    "codeql_examples": [
+      {
+        "rule": "py/insecure-protocol",
+        "level": "unknown",
+        "file": "candidate/tests/conftest.py",
+        "line": 60,
+        "message": "Insecure SSL/TLS protocol version TLSv1 allowed by [call to ssl.create_default_context](1).\nInsecure SSL/TLS protocol version TLSv1_1 allowed by [call to ssl.create_default_context](1)."
+      },
+      {
+        "rule": "py/weak-sensitive-data-hashing",
+        "level": "unknown",
+        "file": "candidate/src/requests/auth.py",
+        "line": 179,
+        "message": "[Sensitive data (password)](1) is used in a hashing algorithm (MD5) that is insecure for password hashing, since it is not a computationally expensive hash function.\n[Sensitive data (id)](2) is used in a hashing algorith"
+      },
+      {
+        "rule": "py/weak-sensitive-data-hashing",
+        "level": "unknown",
+        "file": "candidate/src/requests/auth.py",
+        "line": 187,
+        "message": "[Sensitive data (password)](1) is used in a hashing algorithm (SHA1) that is insecure for password hashing, since it is not a computationally expensive hash function.\n[Sensitive data (id)](2) is used in a hashing algorit"
+      },
+      {
+        "rule": "py/weak-sensitive-data-hashing",
+        "level": "unknown",
+        "file": "candidate/src/requests/auth.py",
+        "line": 195,
+        "message": "[Sensitive data (password)](1) is used in a hashing algorithm (SHA256) that is insecure for password hashing, since it is not a computationally expensive hash function."
+      },
+      {
+        "rule": "py/weak-sensitive-data-hashing",
+        "level": "unknown",
+        "file": "candidate/src/requests/auth.py",
+        "line": 203,
+        "message": "[Sensitive data (password)](1) is used in a hashing algorithm (SHA512) that is insecure for password hashing, since it is not a computationally expensive hash function."
+      },
+      {
+        "rule": "py/request-without-cert-validation",
+        "level": "unknown",
+        "file": "candidate/tests/test_requests.py",
+        "line": 2949,
+        "message": "This request may run without certificate validation because [it is disabled](1)."
+      },
+      {
+        "rule": "py/request-without-cert-validation",
+        "level": "unknown",
+        "file": "candidate/tests/test_requests.py",
+        "line": 2982,
+        "message": "This request may run without certificate validation because [it is disabled](1)."
+      },
+      {
+        "rule": "py/request-without-cert-validation",
+        "level": "unknown",
+        "file": "candidate/tests/test_requests.py",
+        "line": 3015,
+        "message": "This request may run without certificate validation because [it is disabled](1)."
+      },
+      {
+        "rule": "py/request-without-cert-validation",
+        "level": "unknown",
+        "file": "candidate/tests/test_requests.py",
+        "line": 3055,
+        "message": "This request may run without certificate validation because [it is disabled](1)."
+      }
+    ],
+    "osv_distinct_vulnerability_ids": 4,
+    "osv_examples": [
+      {
+        "id": "GHSA-65pc-fj4g-8rjx",
+        "packages": [
+          "idna"
+        ]
+      },
+      {
+        "id": "GHSA-6q48-6c7w-9gw2",
+        "packages": [
+          "certifi"
+        ]
+      },
+      {
+        "id": "PYSEC-2026-215",
+        "packages": [
+          "idna"
+        ]
+      },
+      {
+        "id": "PYSEC-2026-4320",
+        "packages": [
+          "certifi"
+        ]
+      }
+    ],
+    "embedded_skill_findings": 0
+  },
+  "advisory_scope": "Advisory assessment of configured static checks only; never automatic installation or publication."
+}
